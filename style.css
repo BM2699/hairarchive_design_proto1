@@ -1,0 +1,581 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root{
+  --ink:#111;
+  --paper:#f7f7f7;
+  --accent:#d8cfc4; /* warm beige accent */
+  --muted:#888;
+  --line:#ccc;
+}
+html, body { height: 100%; }
+body {
+  font-family: 'Cormorant Garamond', serif;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* ----- Scroll snap container ----- */
+main#scroller{
+  height: 100dvh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+/* ----- Sections ----- */
+.section{
+  min-height: 100dvh;
+  padding: 8vh 10vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  scroll-snap-align: start;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  position: relative;
+}
+.section.visible{ opacity: 1; transform: translateY(0); }
+
+/* SECTION 3: Scene positioning - place heading in the upper third area */
+#scene{
+  /* align content toward the top of the section so heading sits in the upper portion of the viewport */
+  justify-content: flex-start;
+  padding-top: 12vh; /* space from top; adjust if you want it higher/lower */
+  padding-bottom: 6vh;
+}
+.scene-top{
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+.scene-index{
+  font-family:'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.scene-heading{ margin-top: 0; }
+
+/* Scene body centers its content vertically while heading stays toward the top */
+.scene-body{
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  flex: 1 1 auto; /* take remaining vertical space */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* horizontal centering */
+  justify-content: center; /* vertical centering of content */
+  text-align: center;
+  padding-top: 1.2rem;
+  padding-bottom: 1.2rem;
+  gap: 1rem;
+}
+.scene-body p{ max-width: 60ch; }
+
+/* Footer holds the action button and sits near the lower third of the section */
+.scene-footer{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto; /* push to bottom of the section */
+  padding-bottom: 10vh; /* leave breathing room so button sits in the lower 1/3 */
+}
+.scene-footer .btn{
+  width: min(420px, 70%);
+}
+
+h1, h2 { font-weight: 600; margin-bottom: 1em; text-align: center; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.5rem); }
+h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); }
+p { font-size: 1.1rem; line-height: 1.6; text-align: center; }
+
+/* ----- Unified Buttons ----- */
+.btn{
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.2;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: 1px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, opacity 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.btn:hover{ background: #f0f0f0; }
+.btn:focus-visible{ outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.secondary{ background: transparent; border-color: var(--ink); }
+.secondary:hover{ background: #f5f5f5; }
+
+.primary{
+  border: none;
+  background: var(--accent);
+  color: var(--ink);
+  padding: 10px 20px;
+  margin-top: 2em;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+.primary:hover{ opacity: 0.85; }
+
+/* Landing specifics */
+#landing h1 span{
+  cursor: pointer;
+  border-bottom: 1px solid #bbb;
+}
+/* Scroll arrow - animated guide for scrolling */
+.scroll-arrow{
+  position: absolute;
+  bottom: 15vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2rem;
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity 1s ease;
+  cursor: pointer;
+  pointer-events: none;
+  animation: bounce-arrow 2s ease-in-out infinite;
+  z-index: 10;
+}
+#landing.active .scroll-arrow{ 
+  opacity: 1; 
+  pointer-events: auto;
+}
+@keyframes bounce-arrow{
+  0%, 100%{ 
+    transform: translateX(-50%) translateY(0); 
+  }
+  50%{ 
+    transform: translateX(-50%) translateY(8px); 
+  }
+}
+.scroll-arrow:hover{
+  opacity: 0.8;
+}
+
+/* down-arrow removed */
+
+/* Split layouts */
+.split{
+  flex-direction: row;
+  /* let children stretch so we can position content inside the left column */
+  align-items: stretch;
+  gap: clamp(2rem, 4vw, 4rem);
+}
+.split .imageSide, .split .prompts{ width: 50%; }
+
+/* Position the trace display in the approximate middle of the middle third of the left column.
+   Use absolute positioning inside the left column so it visually sits around 33vh from the top. */
+.split .imageSide{ position: relative; display: flex; justify-content: center; }
+#traceDisplay{
+  position: absolute;
+  top: 28vh; /* moved up slightly so the trace preview sits higher in the left column */
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(80%, 420px);
+  max-width: 420px;
+  height: auto;
+  border: 1px dashed var(--line);
+  display: flex; justify-content: center; align-items: center;
+  color: #666;
+  background: #fff;
+  padding: 1rem;
+}
+
+/* ----- Section 2 (Background) ----- */
+.section.long{ /* scroll reveal section - appears same height as others */
+  min-height: 100dvh; /* same visible height as other sections */
+  align-items: stretch;
+  position: relative;
+  opacity: 1 !important; /* Ensure section is visible for scroll reveal */
+  transform: none !important;
+}
+.bg-inner{
+  position: relative;
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Two columns: copy on left, images on right */
+  gap: clamp(1.5rem, 4vw, 4rem);
+  width: 100%;
+  min-height: 500vh; /* Large height to provide scroll space for sticky element */
+}
+.bg-text{
+  position: relative;
+  width: 100%;
+  min-height: 500vh; /* Large height to keep sticky copy visible - similar to Niice pattern */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 0;
+}
+.bg-copy{
+  position: sticky;
+  top: 15vh; /* Position for sticky copy */
+  padding-top: 1rem;
+  max-width: min(800px, 90%);
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  width: 100%;
+  will-change: transform; /* Optimize for sticky positioning */
+  visibility: visible !important; /* Ensure container is visible */
+  opacity: 1 !important; /* Ensure container is visible */
+  display: block !important; /* Ensure container displays */
+  z-index: 2; /* Above images */
+}
+.bg-copy .fixed-heading{
+  position: relative; /* Part of the sticky container, not fixed */
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem; /* Space below heading */
+  margin-top: 0;
+  text-align: center;
+  pointer-events: none;
+}
+.bg-copy .hint{
+  position: relative; /* Part of the sticky container */
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 0;
+  margin-bottom: 2rem; /* Space before copy starts */
+  text-align: center;
+  text-transform: lowercase;
+  pointer-events: none;
+}
+.bg-visuals{
+  position: sticky; /* Stick to viewport as user scrolls */
+  top: 0; /* Stick to top of viewport */
+  align-self: flex-start; /* Align to top */
+  display: flex !important;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  visibility: visible !important; /* Ensure container is visible */
+  opacity: 1 !important;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  overflow: visible; /* Allow images to be visible */
+  z-index: 0; /* Behind text but visible */
+}
+.visItem{
+  position: absolute; /* Position absolutely so images stack and replace each other in center */
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Center the image */
+  width: 90%;
+  max-width: 400px;
+  display: flex !important; 
+  flex-direction: column;
+  justify-content: center; 
+  align-items: center;
+  gap: 1rem;
+  opacity: 0 !important; /* Start hidden - use !important to ensure it's applied */
+  transition: opacity 0.8s ease !important; /* Ensure transition works */
+  visibility: visible !important;
+  z-index: 1;
+  pointer-events: none; /* Disable pointer events when hidden */
+  /* No border, no background */
+  border: none;
+  background: transparent;
+}
+.media-rect{
+  position: relative;
+  width: 100%;
+  min-height: 160px;
+  /* Allow media rects to scale relative to viewport and the visItem container */
+  max-height: calc(80vh);
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  /* No border, no background color */
+  border: none;
+  background: transparent;
+}
+.visItem.visible{ 
+  opacity: 1 !important; 
+  transform: translate(-50%, -50%) !important; /* Keep centered when visible */
+  visibility: visible !important;
+  z-index: 2 !important; /* Bring visible item to front */
+  pointer-events: auto !important; /* Enable hover on visible item */
+  display: flex !important; /* Ensure display */
+}
+/* Ensure no other rules override this - use more specific selector */
+div.bg-visuals div.visItem.visible {
+  opacity: 1 !important;
+}
+.media-rect img,
+.media-rect video{
+  /* Let media scale naturally but constrain by max dimensions so they never overflow the viewport */
+  max-width: 100%;
+  max-height: calc(80vh);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Make the stacked container scroll internally if multiple media items exceed the visible area */
+.visItem{
+  /* keep centered, but limit height and allow internal scrolling */
+  max-height: calc(80vh);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.media-rect .tooltip{
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  max-width: 400px;
+  white-space: normal;
+  text-align: left;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 10;
+  margin-bottom: 8px;
+}
+.media-rect:hover .tooltip{ 
+  opacity: 1; 
+  transform: translateX(-50%) translateY(-6px);
+}
+.bg-copy .reveal-line{
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  line-height: 1.6;
+  margin: 0.7rem 0;
+  text-align: center;
+}
+.bg-copy .fade-line{
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  line-height: 1.6;
+  margin: 0.7rem 0;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.bg-copy .fade-element{
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.bg-copy .fade-line.faded-in,
+.bg-copy .fade-element.faded-in{
+  opacity: 1;
+}
+.eyebrow{
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+.bg-line{
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  margin: 0.7rem 0;
+  text-align: left;
+}
+.bg-line .kw{ 
+  opacity: 0.15; 
+  transition: opacity 0.6s ease;
+  border-bottom: 1px dotted #bbb;
+}
+.bg-line .kw.revealed{ opacity: 1; }
+.hint{ color: var(--muted); font-size: 0.95rem; margin-top: 0.6rem; text-align: left; }
+
+
+/* word by word reveal - similar to Niice pattern */
+.bg-copy .word{ 
+  opacity: 0 !important; 
+  transition: opacity 0.4s ease; 
+  display: inline-block !important; /* Ensure words display properly */
+  visibility: visible !important; /* Ensure words are visible */
+  position: relative; /* Ensure proper positioning */
+}
+.bg-copy .word.revealed{ 
+  opacity: 1 !important; 
+  visibility: visible !important;
+}
+
+
+/* ----- Record cards ----- */
+.options { 
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2rem;
+  width: min(1200px, 90vw);
+  margin: 2rem auto;
+}
+.card {
+  flex: 1;
+  max-width: 500px;
+  min-width: 300px;
+  border: 1px solid var(--line);
+  padding: 2em;
+  text-align: center;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.card:hover:not(.disabled) { transform: scale(1.05); }
+.card img { 
+  width: 100%; 
+  max-height: 300px;
+  object-fit: contain;
+  margin-top: 1em; 
+  display: none; 
+}
+.card canvas {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 1em 0;
+}
+.canvasTools { 
+  margin-top: auto;
+  padding-top: 1em;
+  display: flex; 
+  justify-content: center; 
+  gap: 1em; 
+}
+
+/* Record section specific styles */
+.instruction {
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+.card.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.clear-input {
+  display: none;
+  margin-top: 1rem;
+}
+
+.error-message {
+  text-align: center;
+  max-width: 400px;
+  margin: 1rem auto;
+  font-size: 0.9rem;
+}
+.note { display: block; margin-top: 1em; font-size: 0.9rem; color: #777; }
+
+/* Prompts */
+.prompt{
+  margin-top: 1em;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+  text-align: left;
+}
+.response{
+  width: 100%;
+  max-width: 100%; /* prevent growing wider than container */
+  min-height: 80px;
+  margin: 10px 0 18px;
+  font-family: 'Helvetica', Arial, sans-serif;
+  font-size: 1.1rem;
+  padding: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  resize: vertical; /* allow user to resize only vertically, not horizontally */
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+.hidden{ display: none; }
+
+/* Interactive prompt focus / expanded styles */
+.prompt:focus{
+  outline: 2px dashed var(--muted);
+  outline-offset: 6px;
+}
+.prompt[aria-expanded="true"]{
+  border-bottom-color: var(--ink);
+}
+.response:focus{
+  outline: 2px solid var(--accent);
+}
+
+/* Review */
+#reviewContainer{
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  width: min(600px, 90%);
+}
+.reviewItem{
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1em;
+}
+.buttons{
+  display: flex; gap: 1em; justify-content: center; margin-top: 1em;
+}
+.buttons .primary{ margin-top: 0; }
+
+/* Overlay */
+#overlay{
+  position: fixed; inset: 0;
+  background: rgba(255,255,255,0.96);
+  display: none; justify-content: center; align-items: center;
+  padding: 2rem;
+}
+#overlay .overlayContent{
+  text-align: center;
+  background: #fff;
+  padding: 2.2rem 2.6rem;
+  border: 1px solid var(--line);
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px){
+  .split{ flex-direction: column; }
+  .split .imageSide, .split .prompts{ width: 100%; }
+  .bg-inner{ 
+    grid-template-columns: 1fr; /* Stack vertically on mobile */
+  }
+  .bg-visuals{ 
+    min-height: auto; 
+    gap: 16vh; /* Smaller gap on mobile */
+  }
+  /* Make scene spacing a bit tighter on small screens */
+  #scene{ padding-top: 8vh; }
+  /* Stack cards vertically on mobile */
+  .options {
+    flex-direction: column;
+    align-items: center;
+  }
+  .card {
+    width: min(500px, 90vw);
+  }
+  /* On small screens, don't absolutely position the trace display - let it flow */
+  #traceDisplay{
+    position: static;
+    transform: none;
+    margin: 1rem auto;
+    width: min(90%, 420px);
+  }
+}

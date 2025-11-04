@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hair Archive</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+</head>
+<body>
+  <main id="scroller">
+    <!-- SECTION 1: Landing -->
+    <section id="landing" class="section">
+      <h1>to shed is to <span id="question">?</span></h1>
+      <div id="investigate" class="scroll-arrow" aria-label="Continue to next section">↓</div>
+      
+    </section>
+
+    <!-- SECTION 2: Background (cinematic scroll with fixed text + scrolling visuals) -->
+    <section id="background" class="section long">
+      <div class="bg-inner">
+        <div class="bg-text">
+          <div class="bg-copy" id="bgCopy">
+            <h2 class="eyebrow fixed-heading">Intro</h2>
+            <p class="hint">scroll to reveal</p>
+            <p class="reveal-line">On average, we shed 50 to 100 strands of hair on a daily basis</p>
+            <p class="reveal-line">Once shed, we view them as passive beings (waste / resource / evidence)</p>
+            <p class="reveal-line">And forget that like our identity, hair is</p>
+            <p class="reveal-line">protective when attached</p>
+            <p class="reveal-line">adaptive when challenged</p>
+            <p class="reveal-line">regenrative when lost</p>
+            <p class="fade-line">Shed Hair Archive is a collective experiment investigating shed hair as an extension of identity through the lens of auto-ethnography and epigeneitcs.</p>
+            <button id="beginFromBg" class="btn primary fade-element" style="margin-top:1.2em;">Begin Your Investigation</button>
+          </div>
+        </div>
+
+        <div class="bg-visuals" id="bgVisuals">
+          <!-- Images will be revealed as keywords trigger -->
+        </div>
+      </div>
+      
+    </section>
+
+    <!-- SECTION 3: Set the Scene -->
+    <section id="scene" class="section">
+      <div class="scene-top">
+        <div class="scene-index">00</div>
+        <h2 class="eyebrow fixed-heading scene-heading">Set the Scene</h2>
+      </div>
+      <div class="scene-body">
+        <p>For the optimal experience, it’s best to begin the investigation in your living space.</p><p>If you’re elsewhere, start from the space that holds you now.</p>
+      </div>
+      <div class="scene-footer">
+        <button class="btn primary next">Confirm</button>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Find Your Traces -->
+    <section id="find" class="section">
+      <div class="scene-top">
+        <div class="scene-index">01</div>
+        <h2 class="eyebrow fixed-heading scene-heading">Find Your Traces</h2>
+      </div>
+      <div class="scene-body">
+        <p>Observe, collect, or imagine a strand that once belonged to you.</p><br/>Some places to start are:<br/>Bed<br/>Bathroom<br/>Vacuum Waste Bin<br/>Hair Care Tools<br/>Corners / Crevices<br/></p><p>*If you are currently not at home, feel free to use your imagination, or observe strands still currently attached on your body.*</p>
+      </div>
+      <div class="scene-footer">
+        <button class="btn primary next">Confirm</button>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Record Your Traces -->
+    <section id="record" class="section">
+       <div class="scene-top">
+        <div class="scene-index">02</div>
+        <h2 class="eyebrow fixed-heading scene-heading">Record Your Traces</h2>
+      </div>
+      <div class="scene-body">
+        <div class="card" id="photoCard">
+          <p>📷 Photograph your found hair</p>
+          <input type="file" id="photoInput" accept="image/*">
+          <img id="photoPreview" alt="">
+        </div>
+        <div class="card" id="drawCard">
+          <p>✏️ Draw an interpretation</p>
+          <canvas id="drawCanvas" width="300" height="300"></canvas>
+          <div class="canvasTools">
+            <button id="undoDraw" class="btn secondary">Undo</button>
+            <button id="clearDraw" class="btn secondary">Clear</button>
+          </div>
+        </div>
+      </div>
+      <em class="note">Your image or drawing will not be stored permanently. This is an ephemeral record.</em>
+      <button class="btn primary next">Continue</button>
+      
+    </section>
+
+    <!-- SECTION 6: Investigate Your Traces -->
+    <section id="investigateTraces" class="section split">
+      <div class="imageSide">
+        <div id="traceDisplay">[user image or drawing here]</div>
+      </div>
+      <div class="prompts">
+                 <!-- <div class="scene-top"> -->
+        <h2 class="scene-index">03</h2>
+        <h2 class="eyebrow fixed-heading scene-heading">Investigate Your Traces</h2>
+        <p class="scene-body">Take a closer look at your trace. Choose one or more prompt that speaks to your and share what comes to mind.</p>
+
+  <div class="prompt" data-prompt="origin" tabindex="0" role="button" aria-expanded="false">Where do you think this strand came from?</div>
+        <textarea id="originText" class="response hidden" placeholder=""></textarea>
+
+  <div class="prompt" data-prompt="emotion" tabindex="0" role="button" aria-expanded="false">What emotion does this strand carry?</div>
+        <textarea id="emotionText" class="response hidden" placeholder="Type your response..."></textarea>
+
+  <div class="prompt" data-prompt="connection" tabindex="0" role="button" aria-expanded="false">Who or what might share this strand’s lineage?</div>
+        <textarea id="connectionText" class="response hidden" placeholder="Type your response..."></textarea>
+
+  <div class="prompt" data-prompt="connection-1" tabindex="0" role="button" aria-expanded="false">If this strand encapsulates a trait passed down to me, what would it be?<br>(could be spiritual, personality, physical)</div>
+  <textarea id="connectionText-1" class="response hidden" placeholder="Type your response..."></textarea>
+
+  <div class="prompt" data-prompt="connection-2" tabindex="0" role="button" aria-expanded="false">If this strand could speak, what would it say 100 years from today?</div>
+  <textarea id="connectionText-2" class="response hidden" placeholder="Type your response..."></textarea>
+
+  <div class="prompt" data-prompt="connection-3" tabindex="0" role="button" aria-expanded="false">If this strand was a timeline, what would it entail?</div>
+  <textarea id="connectionText-3" class="response hidden" placeholder="Type your response..."></textarea>
+
+  <div class="prompt" data-prompt="connection-4" tabindex="0" role="button" aria-expanded="false">How far am I able to trace back my roots?</div>
+  <textarea id="connectionText-4" class="response hidden" placeholder="Type your response..."></textarea>
+
+  <div class="prompt" data-prompt="connection-5" tabindex="0" role="button" aria-expanded="false">What kinds of thoughts or feelings are coming up for me as I look at my traces?</div>
+  <textarea id="connectionText-5" class="response hidden" placeholder="Type your response..."></textarea>
+
+        <button class="btn primary next">Review</button>
+      </div>
+      
+    </section>
+
+    <!-- SECTION 7: Review & Submit -->
+    <section id="review" class="section">
+      <h2>Review Your Investigations</h2>
+      <div id="reviewContainer"></div>
+      <div class="buttons">
+        <button id="submitArchive" class="btn primary">Release to Archive</button>
+        <button id="downloadPDF" class="btn primary">Keep for Myself</button>
+      </div>
+      
+    </section>
+  </main>
+
+  <!-- Overlay confirmation -->
+  <div id="overlay">
+    <div class="overlayContent">
+      <p>Your strand has joined the archive.</p>
+      <button id="closeOverlay" class="btn primary">Close</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
