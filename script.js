@@ -620,29 +620,79 @@ document.querySelectorAll('.next').forEach(btn => {
 /* ===== Review population on entry ===== */
 const reviewContainer = document.getElementById('reviewContainer');
 const reviewSection = document.getElementById('review');
+
+// Helper function to get the prompt question text for a given textarea
+function getPromptText(textareaId) {
+  // Find the textarea element
+  const textarea = document.getElementById(textareaId);
+  if (!textarea) return null;
+  
+  // Find the prompt element that comes before this textarea
+  // Check if previous sibling is the prompt
+  let promptElement = textarea.previousElementSibling;
+  
+  // If previous sibling is a prompt, use it
+  if (promptElement && promptElement.classList.contains('prompt')) {
+    // Get the text content, removing HTML tags and normalizing whitespace
+    let text = promptElement.textContent.trim();
+    // Replace multiple spaces/newlines with single space
+    text = text.replace(/\s+/g, ' ');
+    return text;
+  }
+  
+  // If not found as sibling, try finding by data-prompt attribute
+  // Map textarea IDs to data-prompt values
+  const idToPromptMap = {
+    'originText': 'origin',
+    'emotionText': 'emotion',
+    'connectionText': 'connection',
+    'connectionText-1': 'connection-1',
+    'connectionText-2': 'connection-2',
+    'connectionText-3': 'connection-3',
+    'connectionText-4': 'connection-4',
+    'connectionText-5': 'connection-5'
+  };
+  
+  const promptId = idToPromptMap[textareaId];
+  if (promptId) {
+    promptElement = document.querySelector(`[data-prompt="${promptId}"]`);
+    if (promptElement && promptElement.classList.contains('prompt')) {
+      let text = promptElement.textContent.trim();
+      text = text.replace(/\s+/g, ' ');
+      return text;
+    }
+  }
+  
+  return null;
+}
+
 const reviewObserver = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) {
       reviewContainer.innerHTML = '';
-      // Collect responses: origin & emotion are single, connection may have multiple entries
-      ['origin','emotion'].forEach(key => {
-        const val = document.getElementById(key + 'Text')?.value.trim();
-        if (val){
+      
+      // Collect origin and emotion responses with full prompt text
+      ['origin', 'emotion'].forEach(key => {
+        const textareaId = key + 'Text';
+        const val = document.getElementById(textareaId)?.value.trim();
+        if (val) {
+          const promptText = getPromptText(textareaId) || key;
           const div = document.createElement('div');
           div.className = 'reviewItem';
-          div.innerHTML = `<h3 style="margin-bottom:.4rem;text-transform:capitalize;">${key}</h3><p style="text-align:left;">${val}</p>`;
+          div.innerHTML = `<h3 style="margin-bottom:.4rem;">${promptText}</h3><p style="text-align:left;">${val}</p>`;
           reviewContainer.appendChild(div);
         }
       });
-      // Gather all connection* textareas (connectionText, connectionText-1...)
+      
+      // Gather all connection* textareas with full prompt text
       const connectionTextareas = Array.from(document.querySelectorAll('textarea[id^="connectionText"]'));
-      connectionTextareas.forEach((ta, idx) => {
+      connectionTextareas.forEach(ta => {
         const val = ta.value.trim();
         if (val) {
+          const promptText = getPromptText(ta.id) || ta.id;
           const div = document.createElement('div');
           div.className = 'reviewItem';
-          const title = idx === 0 ? 'connection' : `connection ${idx}`;
-          div.innerHTML = `<h3 style="margin-bottom:.4rem;text-transform:capitalize;">${title}</h3><p style="text-align:left;">${val}</p>`;
+          div.innerHTML = `<h3 style="margin-bottom:.4rem;">${promptText}</h3><p style="text-align:left;">${val}</p>`;
           reviewContainer.appendChild(div);
         }
       });
