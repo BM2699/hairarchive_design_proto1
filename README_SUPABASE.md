@@ -5,6 +5,8 @@ This README explains how to set up a Supabase backend for this static web projec
 1) Create a Supabase project
 - Go to https://app.supabase.com and create a new project.
 - Note the Project URL and the ANON public API key (Project Settings -> API -> Config).
+https://cphqjbvwmrzbrvjkyned.supabase.co
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwaHFqYnZ3bXJ6YnJ2amt5bmVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNjg3MTMsImV4cCI6MjA3Nzg0NDcxM30.C6bthui6fjKoDgQ9ZKaBLBLo0rDxgcffI7b4j40xVCU
 - For production-like flows, create a server `service_role` key and keep it secret (for server-side operations only).
 
 2) Create a Storage bucket
@@ -18,13 +20,17 @@ This README explains how to set up a Supabase backend for this static web projec
 -- Table to store archive records (metadata)
 CREATE TABLE public.archives (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  type text NOT NULL CHECK (type IN ('photo','drawing')),
+  type text NOT NULL CHECK (type IN ('photo')),
   file_path text,                -- path in storage (e.g. "archives/2025-11-04/abc.png")
   file_url text,                 -- optional public URL (can be generated server-side)
-  drawing_data text,             -- optional base64/dataURL fallback (not recommended long-term)
-  origin text,
-  emotion text,
-  connections jsonb,             -- store multiple prompt answers as JSON
+  origin text,                   -- response to "Where do you think this strand came from?"
+  emotion text,                  -- response to "What emotion does this strand carry?"
+  connection text,               -- response to "Who or what might share this strand's lineage?"
+  connection_1 text,             -- response to "If this strand encapsulates a trait passed down to me, what would it be?"
+  connection_2 text,             -- response to "If this strand could speak, what would it say 100 years from today?"
+  connection_3 text,             -- response to "If this strand was a timeline, what would it entail?"
+  connection_4 text,             -- response to "How far am I able to trace back my roots?"
+  connection_5 text,             -- response to "What kinds of thoughts or feelings are coming up for me as I look at my traces?"
   created_at timestamptz DEFAULT now()
 );
 
@@ -51,8 +57,8 @@ Be careful: this effectively allows anyone to insert. Prefer authentication.
 6) Client usage (summary)
 - For client-side usage we provide `supabase-client.js` (example file in this repo). You can include it and call:
   - `uploadImage(file)` — uploads to the `archives` bucket and returns `{ path, publicURL }`
-  - `uploadDrawing(dataUrl)` — converts dataURL to Blob and uploads
   - `insertArchiveRecord(record)` — inserts metadata row into `archives` table
+  - `submitArchive({ file, origin, emotion, connection, connection_1, connection_2, connection_3, connection_4, connection_5 })` — convenience function that uploads image and inserts record in one call
 
 7) Security notes
 - Never put your `service_role` key in frontend code.
@@ -60,11 +66,20 @@ Be careful: this effectively allows anyone to insert. Prefer authentication.
 - Consider adding a basic moderation/backfill pipeline if users can upload arbitrary images.
 
 8) Example: Minimal flow
-- User uploads photo/drawing in the browser
-- The client calls `uploadImage(file)` or `uploadDrawing(dataUrl)`, obtains `file_path` and `file_url`
-- The client calls `insertArchiveRecord({ type, file_path, file_url, origin, emotion, connections })`
+- User uploads photo in the browser
+- User fills in prompt responses (all 8 prompts)
+- When user clicks "Release to Archive", the client calls `submitArchive()` with all 8 prompt responses
+- This function uploads the image to storage and inserts a record with all prompt responses
 
-9) Need help wiring into the UI?
-- I can help integrate the client into `script.js` so that the project uploads and inserts automatically on the "Continue" or "Review" action. Ask and I will implement that wiring.
+9) Data structure
+- Each prompt response is stored as a separate column:
+  - `origin`: "Where do you think this strand came from?"
+  - `emotion`: "What emotion does this strand carry?"
+  - `connection`: "Who or what might share this strand's lineage?"
+  - `connection_1`: "If this strand encapsulates a trait passed down to me, what would it be?"
+  - `connection_2`: "If this strand could speak, what would it say 100 years from today?"
+  - `connection_3`: "If this strand was a timeline, what would it entail?"
+  - `connection_4`: "How far am I able to trace back my roots?"
+  - `connection_5`: "What kinds of thoughts or feelings are coming up for me as I look at my traces?"
 
 -- End

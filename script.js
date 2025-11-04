@@ -526,43 +526,8 @@ document.getElementById('beginFromBg')?.addEventListener('click', () => {
 /* ===== Photo upload preview ===== */
 const photoInput = document.getElementById('photoInput');
 const photoPreview = document.getElementById('photoPreview');
-const photoCard = document.getElementById('photoCard');
-const drawCard = document.getElementById('drawCard');
-const clearPhotoBtn = document.getElementById('clearPhoto');
-const recordContinueBtn = document.getElementById('recordContinue');
-const recordError = document.getElementById('recordError');
 let hasPhoto = false;
-let hasDrawing = false;
-
-// Function to check if canvas has been drawn on
-function isCanvasEmpty(canvas) {
-    const context = canvas.getContext('2d');
-    const pixelBuffer = new Uint32Array(
-        context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
-    );
-    return !pixelBuffer.some(color => color !== 0);
-}
-
-// Function to update UI state based on selected method
-function updateRecordUIState() {
-    if (hasPhoto) {
-        drawCard.classList.add('disabled');
-        canvas.style.pointerEvents = 'none';
-        clearPhotoBtn.style.display = 'block';
-    } else if (hasDrawing) {
-        photoCard.classList.add('disabled');
-        photoInput.disabled = true;
-        clearPhotoBtn.style.display = 'none';
-    } else {
-        drawCard.classList.remove('disabled');
-        photoCard.classList.remove('disabled');
-        canvas.style.pointerEvents = 'auto';
-        photoInput.disabled = false;
-    }
-    
-    // Hide any previous error
-    recordError.style.display = 'none';
-}
+let uploadedFile = null; // Store the actual file for upload
 
 // Handle photo upload
 if (photoInput) {
@@ -570,15 +535,13 @@ if (photoInput) {
         const file = e.target.files?.[0];
         if (!file) return;
         
+        uploadedFile = file; // Store file for later upload
+        
         const reader = new FileReader();
         reader.onload = ev => {
             photoPreview.src = ev.target.result;
             photoPreview.style.display = 'block';
             hasPhoto = true;
-            hasDrawing = false;
-            // Clear any drawing
-            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
-            updateRecordUIState();
             
             // Update investigate preview
             const traceDisplay = document.getElementById('traceDisplay');
@@ -588,118 +551,6 @@ if (photoInput) {
         };
         reader.readAsDataURL(file);
     });
-}
-
-// Clear photo handler
-if (clearPhotoBtn) {
-    clearPhotoBtn.addEventListener('click', () => {
-        photoInput.value = '';
-        photoPreview.src = '';
-        photoPreview.style.display = 'none';
-        hasPhoto = false;
-        updateRecordUIState();
-    });
-}
-
-/* ===== Canvas draw (with Undo / Clear) ===== */
-const canvas = document.getElementById('drawCanvas');
-const ctx = canvas?.getContext('2d');
-let drawing = false;
-let history = [];
-
-// Track canvas state for drawing
-function updateCanvasState() {
-    if (!isCanvasEmpty(canvas)) {
-        hasDrawing = true;
-        hasPhoto = false;
-        // Clear any uploaded photo
-        if (photoInput) photoInput.value = '';
-        if (photoPreview) {
-            photoPreview.src = '';
-            photoPreview.style.display = 'none';
-        }
-        updateRecordUIState();
-    } else {
-        hasDrawing = false;
-        updateRecordUIState();
-    }
-}
-
-// Validate before continuing
-if (recordContinueBtn) {
-    recordContinueBtn.addEventListener('click', (e) => {
-        if (!hasPhoto && !hasDrawing) {
-            e.preventDefault();
-            recordError.textContent = 'Please either upload a photo or create a drawing before continuing.';
-            recordError.style.display = 'block';
-            return;
-        }
-        // Continue to next section if we have either a photo or drawing
-        recordError.style.display = 'none';
-    });
-}
-
-function snapshot(){
-  try{
-    history.push(ctx.getImageData(0,0,canvas.width,canvas.height));
-  }catch(e){
-    // ignore if canvas tainted (shouldn’t be here since we only draw locally)
-  }
-}
-
-if (canvas && ctx){
-  // Initialize blank snapshot
-  snapshot();
-  canvas.addEventListener('mousedown', e => {
-    drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY);
-  });
-  canvas.addEventListener('mouseup', () => { 
-    drawing = false; 
-    snapshot(); 
-    updateCanvasState();
-  });
-  canvas.addEventListener('mouseleave', () => { drawing = false; });
-  canvas.addEventListener('mousemove', e => {
-    if (!drawing) return;
-    ctx.lineWidth = 1; ctx.lineCap = 'round'; ctx.strokeStyle = '#111';
-    ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
-    updateCanvasState();
-  });
-
-  document.getElementById('undoDraw')?.addEventListener('click', () => {
-    if (history.length > 1){
-      history.pop();
-      ctx.putImageData(history[history.length - 1], 0, 0);
-    }else{
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-    }
-    // reflect to investigate preview
-    const traceDisplay = document.getElementById('traceDisplay');
-    if (traceDisplay){
-      const data = canvas.toDataURL('image/png');
-      traceDisplay.innerHTML = `<img src="${data}" alt="Drawing" style="max-width:100%; max-height:100%;">`;
-    }
-  });
-
-  document.getElementById('clearDraw')?.addEventListener('click', () => {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    history = [];
-    snapshot();
-    updateCanvasState();
-    const traceDisplay = document.getElementById('traceDisplay');
-    if (traceDisplay){
-      traceDisplay.textContent = '[user image or drawing here]';
-    }
-  });
-
-  // Mirror to investigate preview whenever mouseup (finished stroke)
-  canvas.addEventListener('mouseup', () => {
-    const data = canvas.toDataURL('image/png');
-    const traceDisplay = document.getElementById('traceDisplay');
-    if (traceDisplay){
-      traceDisplay.innerHTML = `<img src="${data}" alt="Drawing" style="max-width:100%; max-height:100%;">`;
-    }
-  });
 }
 
 /* ===== Prompts (expand/collapse) - accessible interactive prompts ===== */
@@ -801,11 +652,82 @@ const reviewObserver = new IntersectionObserver(entries => {
 reviewObserver.observe(reviewSection);
 
 /* ===== Submit / Overlay ===== */
-document.getElementById('submitArchive')?.addEventListener('click', () => {
-  document.getElementById('overlay').style.display = 'flex';
-});
-document.getElementById('closeOverlay')?.addEventListener('click', () => {
+// Generic overlay close handler (works for static and dynamically created buttons)
+function closeOverlay() {
   document.getElementById('overlay').style.display = 'none';
+}
+
+// Attach to initial close button
+document.getElementById('closeOverlay')?.addEventListener('click', closeOverlay);
+
+// Submit handler
+document.getElementById('submitArchive')?.addEventListener('click', async () => {
+  const submitBtn = document.getElementById('submitArchive');
+  const overlay = document.getElementById('overlay');
+  const overlayContent = overlay.querySelector('.overlayContent');
+  
+  // Validate that we have an image
+  if (!uploadedFile) {
+    alert('Please upload an image before submitting.');
+    return;
+  }
+  
+  // Disable button and show loading state
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  
+  try {
+    // Collect all 8 prompt responses separately
+    const origin = document.getElementById('originText')?.value.trim() || null;
+    const emotion = document.getElementById('emotionText')?.value.trim() || null;
+    const connection = document.getElementById('connectionText')?.value.trim() || null;
+    const connection_1 = document.getElementById('connectionText-1')?.value.trim() || null;
+    const connection_2 = document.getElementById('connectionText-2')?.value.trim() || null;
+    const connection_3 = document.getElementById('connectionText-3')?.value.trim() || null;
+    const connection_4 = document.getElementById('connectionText-4')?.value.trim() || null;
+    const connection_5 = document.getElementById('connectionText-5')?.value.trim() || null;
+    
+    // Check if Supabase client is available
+    if (!window.supabaseClient) {
+      throw new Error('Supabase client not initialized. Please check your Supabase configuration.');
+    }
+    
+    // Submit to Supabase with all 8 prompt responses
+    const result = await window.supabaseClient.submitArchive({
+      file: uploadedFile,
+      origin: origin,
+      emotion: emotion,
+      connection: connection,
+      connection_1: connection_1,
+      connection_2: connection_2,
+      connection_3: connection_3,
+      connection_4: connection_4,
+      connection_5: connection_5
+    });
+    
+    console.log('Archive submitted successfully:', result);
+    
+    // Show success overlay
+    overlayContent.innerHTML = '<p>Your strand has joined the archive.</p><button id="closeOverlay" class="btn primary">Close</button>';
+    overlay.style.display = 'flex';
+    
+    // Re-attach close handler to dynamically created button
+    document.getElementById('closeOverlay')?.addEventListener('click', closeOverlay);
+    
+  } catch (error) {
+    console.error('Error submitting to archive:', error);
+    
+    // Show error message
+    overlayContent.innerHTML = `<p>Error: ${error.message || 'Failed to submit to archive. Please try again.'}</p><button id="closeOverlay" class="btn primary">Close</button>`;
+    overlay.style.display = 'flex';
+    
+    // Re-attach close handler to dynamically created button
+    document.getElementById('closeOverlay')?.addEventListener('click', closeOverlay);
+  } finally {
+    // Re-enable button
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Release to Archive';
+  }
 });
 
 /* ===== Keep for Myself (lightweight print-to-PDF) ===== */

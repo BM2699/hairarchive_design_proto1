@@ -81,16 +81,8 @@
           <input type="file" id="photoInput" accept="image/*">
           <img id="photoPreview" alt="">
         </div>
-        <div class="card" id="drawCard">
-          <p>✏️ Draw an interpretation</p>
-          <canvas id="drawCanvas" width="300" height="300"></canvas>
-          <div class="canvasTools">
-            <button id="undoDraw" class="btn secondary">Undo</button>
-            <button id="clearDraw" class="btn secondary">Clear</button>
-          </div>
-        </div>
       </div>
-      <em class="note">Your image or drawing will not be stored permanently. This is an ephemeral record.</em>
+      <em class="note">Your image will not be stored permanently. This is an ephemeral record.</em>
       <button class="btn primary next">Continue</button>
       
     </section>
@@ -98,7 +90,7 @@
     <!-- SECTION 6: Investigate Your Traces -->
     <section id="investigateTraces" class="section split">
       <div class="imageSide">
-        <div id="traceDisplay">[user image or drawing here]</div>
+        <div id="traceDisplay">[user image here]</div>
       </div>
       <div class="prompts">
                  <!-- <div class="scene-top"> -->
@@ -155,6 +147,14 @@
     </div>
   </div>
 
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // Configure Supabase
+    window.SUPABASE_URL = 'https://cphqjbvwmrzbrvjkyned.supabase.co';
+    window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwaHFqYnZ3bXJ6YnJ2amt5bmVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNjg3MTMsImV4cCI6MjA3Nzg0NDcxM30.C6bthui6fjKoDgQ9ZKaBLBLo0rDxgcffI7b4j40xVCU';
+  </script>
+  <script src="supabase-client.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

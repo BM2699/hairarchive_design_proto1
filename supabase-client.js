@@ -12,7 +12,7 @@
        window.SUPABASE_URL = 'https://xyzcompany.supabase.co';
        window.SUPABASE_ANON_KEY = 'public-anon-key';
      </script>
-  3) Call window.supabaseClient.uploadImage(file) or uploadDrawing(dataUrl)
+  3) Call window.supabaseClient.uploadImage(file) or submitArchive({ file, origin, emotion, connection, connection_1, connection_2, connection_3, connection_4, connection_5 })
 
   Note: the anon key is public by design. Never put a service_role key in client code.
 */
@@ -75,41 +75,49 @@
     return { path, publicURL };
   }
 
-  // Upload a dataURL drawing (convert to blob)
-  async function uploadDrawing(dataUrl, opts = {}) {
-    const blob = dataURLToBlob(dataUrl);
-    // Create a filename
-    const filename = opts.filename || `drawing-${Date.now()}.png`;
-    // Need to set a name on the blob for some libs; use File
-    const file = new File([blob], filename, { type: blob.type });
-    return uploadImage(file, opts);
-  }
 
   // Insert metadata into 'archives' table
   async function insertArchiveRecord(record) {
     if (!sb) throw new Error('Supabase client not initialized');
-    // Expect record = { type, file_path, file_url, drawing_data, origin, emotion, connections }
+    // Expect record = { type, file_path, file_url, origin, emotion, connection, connection_1, connection_2, connection_3, connection_4, connection_5 }
     const { data, error } = await sb.from('archives').insert([record]);
     if (error) throw error;
     return data?.[0] || null;
   }
 
-  // Convenience combined flow: upload + insert
-  async function submitArchive({ type, file, dataUrl, origin, emotion, connections = {} }, opts = {}) {
-    // type: 'photo' or 'drawing'
-    let uploadResult = null;
-    if (file) uploadResult = await uploadImage(file, opts);
-    else if (dataUrl) uploadResult = await uploadDrawing(dataUrl, opts);
+  // Convenience combined flow: upload + insert (image only)
+  async function submitArchive({ 
+    file, 
+    origin, 
+    emotion, 
+    connection, 
+    connection_1, 
+    connection_2, 
+    connection_3, 
+    connection_4, 
+    connection_5 
+  }, opts = {}) {
+    if (!file) throw new Error('Image file is required');
+    
+    // Upload image to storage
+    const uploadResult = await uploadImage(file, opts);
 
+    // Prepare record with all 8 prompt responses
     const record = {
-      type,
-      file_path: uploadResult ? uploadResult.path : null,
-      file_url: uploadResult ? uploadResult.publicURL : null,
-      drawing_data: dataUrl && !uploadResult ? dataUrl : null,
+      type: 'photo',
+      file_path: uploadResult.path,
+      file_url: uploadResult.publicURL,
       origin: origin || null,
       emotion: emotion || null,
-      connections: connections || null
+      connection: connection || null,
+      connection_1: connection_1 || null,
+      connection_2: connection_2 || null,
+      connection_3: connection_3 || null,
+      connection_4: connection_4 || null,
+      connection_5: connection_5 || null
     };
+    
+    // Insert metadata record
     const inserted = await insertArchiveRecord(record);
     return { uploaded: uploadResult, record: inserted };
   }
@@ -128,10 +136,9 @@
         console.error(e);
       }
     },
-    uploadImage,
-    uploadDrawing,
-    insertArchiveRecord,
-    submitArchive
+  uploadImage,
+  insertArchiveRecord,
+  submitArchive
   };
 
 })();
