@@ -411,6 +411,10 @@ div.bg-visuals div.visItem.visible {
   opacity: 1 !important; 
   visibility: visible !important;
 }
+.bg-copy .word.blurred{
+  filter: blur(2px);
+  transition: filter 0.3s ease;
+}
 
 
 /* ----- Record cards ----- */
@@ -550,6 +554,15 @@ div.bg-visuals div.visItem.visible {
   border: 1px solid var(--line);
 }
 
+#hairCanvas{
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 2;
+}
+
 /* Responsive tweaks */
 @media (max-width: 900px){
   .split{ flex-direction: column; }
@@ -578,4 +591,17 @@ div.bg-visuals div.visItem.visible {
     margin: 1rem auto;
     width: min(90%, 420px);
   }
+}
+
+#introCallout .intro-callout{
+  max-width: min(620px, 85%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  text-align: center;
+}
+#introCallout .intro-callout p{
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+  line-height: 1.7;
 }

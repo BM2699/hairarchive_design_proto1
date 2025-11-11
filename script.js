@@ -107,8 +107,10 @@ const keywordConfig = [
 ];
 
 const triggeredKeys = new Set();
+let currentMediaKey = null;
+let currentBlurSpans = [];
 let wordSpans = [];
-let buttonFadeInitiated = false; // Track if button fade has been initiated
+const mediaCache = new Map();
 
 function buildWordSpans(){
   if (!bgCopy) {
@@ -258,33 +260,7 @@ function checkKeywordTriggers(){
   });
 }
 
-function revealImagesForKey(entry){
-  if (!bgVisuals) {
-    console.log('bgVisuals not found');
-    return;
-  }
-  
-  console.log('Revealing images for keyword:', entry.key, 'Images:', entry.images);
-  
-  // Fade out all currently visible images first
-  const visibleItems = bgVisuals.querySelectorAll('.visItem.visible');
-  console.log('Fading out', visibleItems.length, 'visible items');
-  visibleItems.forEach(item => {
-    item.classList.remove('visible');
-    // Remove after fade out completes
-    setTimeout(() => {
-      if (!item.classList.contains('visible')) {
-        item.remove();
-      }
-    }, 800); // Match transition duration
-  });
-  
-  if (!entry.images || entry.images.length === 0) {
-    console.log('No images found for entry:', entry.key);
-    return;
-  }
-  
-  // Create container for all images (stacked vertically)
+function createMediaContainer(entry){
   const container = document.createElement('div');
   container.className = 'visItem';
   container.style.display = 'flex';
@@ -293,12 +269,10 @@ function revealImagesForKey(entry){
   container.style.alignItems = 'center';
   container.style.justifyContent = 'center';
   
-  // Create each media item as a separate rectangle
-  entry.images.forEach((img, index) => {
+  entry.images.forEach(img => {
     const mediaRect = document.createElement('div');
     mediaRect.className = 'media-rect';
     
-    // Create tooltip if caption exists
     if (img.caption) {
       const tooltip = document.createElement('div');
       tooltip.className = 'tooltip';
@@ -306,7 +280,6 @@ function revealImagesForKey(entry){
       mediaRect.appendChild(tooltip);
     }
     
-    // Determine media type and create appropriate element
     const url = img.url || '';
     const isVideo = url.match(/\.(mp4|webm|ogg)$/i);
     
@@ -336,6 +309,65 @@ function revealImagesForKey(entry){
     
     container.appendChild(mediaRect);
   });
+
+  return container;
+}
+
+function setBlurForSpans(spans = []){
+  currentBlurSpans.forEach(span => span?.classList.remove('blurred'));
+  currentBlurSpans = [];
+  if (!spans || spans.length === 0) return;
+  spans.forEach(span => span?.classList.add('blurred'));
+  currentBlurSpans = spans;
+}
+
+function clearVisualMedia(){
+  if (!bgVisuals) return;
+  const items = Array.from(bgVisuals.querySelectorAll('.visItem'));
+  items.forEach(item => {
+    item.classList.remove('visible');
+    setTimeout(() => {
+      if (!item.classList.contains('visible')) item.remove();
+    }, 800);
+  });
+  currentMediaKey = null;
+  setBlurForSpans();
+}
+
+function revealImagesForKey(entry){
+  if (!bgVisuals) {
+    console.log('bgVisuals not found');
+    return;
+  }
+  if (!entry || !entry.images || entry.images.length === 0) {
+    clearVisualMedia();
+    return;
+  }
+  if (currentMediaKey === entry.key) return;
+
+  console.log('Revealing images for keyword:', entry.key, 'Images:', entry.images);
+
+  // Fade out all currently visible images first
+  const visibleItems = bgVisuals.querySelectorAll('.visItem.visible');
+  console.log('Fading out', visibleItems.length, 'visible items');
+  visibleItems.forEach(item => {
+    item.classList.remove('visible');
+    // Remove after fade out completes
+    setTimeout(() => {
+      if (!item.classList.contains('visible')) {
+        item.remove();
+      }
+    }, 800); // Match transition duration
+  });
+
+  let container = mediaCache.get(entry.key);
+  if (!container) {
+    container = createMediaContainer(entry);
+    mediaCache.set(entry.key, container);
+  }
+  if (container.parentElement) {
+    container.parentElement.removeChild(container);
+  }
   
   bgVisuals.appendChild(container);
   console.log('Media container added for keyword:', entry.key, 'with', entry.images.length, 'items');
@@ -367,6 +399,87 @@ function revealImagesForKey(entry){
       });
     }, 200);
   });
+
+  currentMediaKey = entry.key;
+}
+
+function findKeywordMatch(entry, words){
+  const keyWords = entry.key.toLowerCase().split(/\s+/);
+  const keyTokens = keyWords.map(w => w.replace(/[^a-z0-9]+/g, ''));
+
+  if (keyWords.length > 1) {
+    for (let i = 0; i <= words.length - keyTokens.length; i++) {
+      let allMatch = true;
+      const spans = [];
+      for (let j = 0; j < keyTokens.length; j++) {
+        if (!wordSpans[i+j] || !wordSpans[i+j].classList.contains('revealed')) {
+          allMatch = false;
+          break;
+        }
+        if (words[i+j] !== keyTokens[j]) {
+          allMatch = false;
+          break;
+        }
+        spans.push(wordSpans[i+j]);
+      }
+      if (allMatch) return spans;
+    }
+    const normalizedConcat = keyTokens.join('');
+    for (let i = 0; i < words.length; i++) {
+      if (words[i] === normalizedConcat && wordSpans[i].classList.contains('revealed')) {
+        return [wordSpans[i]];
+      }
+    }
+  } else {
+    const normalizedKey = keyTokens[0];
+    for (let i = 0; i < words.length; i++) {
+      const span = wordSpans[i];
+      if (!span || !span.classList.contains('revealed')) continue;
+      const wordText = span.textContent.toLowerCase();
+      const normalizedWord = words[i];
+      if (normalizedWord === normalizedKey) return [span];
+
+      if (/^\d+$/.test(entry.key)) {
+        const escaped = entry.key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const startsWithPattern = new RegExp('^' + escaped + '(?:-|$)');
+        const endsWithPattern = new RegExp('(?:^|-)' + escaped + '$');
+        if (wordText.match(startsWithPattern) || wordText.match(endsWithPattern)) return [span];
+      } else if (normalizedWord.includes(normalizedKey)) {
+        return [span];
+      }
+    }
+  }
+  return null;
+}
+
+function updateMediaForScroll(){
+  if (!bgCopy || wordSpans.length === 0) return;
+  const words = wordSpans.map(normalizedWord);
+  let activeEntry = null;
+  let activeSpans = null;
+
+  keywordConfig.forEach(entry => {
+    const spans = findKeywordMatch(entry, words);
+    if (spans) {
+      activeEntry = entry;
+      activeSpans = spans;
+    }
+  });
+
+  if (activeEntry) {
+    setBlurForSpans(activeSpans);
+    bgVisuals?.classList.add('fade-in');
+    if (currentMediaKey !== activeEntry.key) {
+      revealImagesForKey(activeEntry);
+    }
+  } else if (currentMediaKey) {
+    clearVisualMedia();
+    bgVisuals?.classList.remove('fade-in');
+    setBlurForSpans();
+  } else {
+    bgVisuals?.classList.remove('fade-in');
+    setBlurForSpans();
+  }
 }
 
 function handleBackgroundScroll(){
@@ -378,6 +491,9 @@ function handleBackgroundScroll(){
     console.log('No word spans found');
     return;
   }
+  
+
+
   
   const viewportH = scroller ? scroller.clientHeight : (window.innerHeight || document.documentElement.clientHeight);
   const sectionTopAbs = bgSection.offsetTop; // relative to scroller
@@ -409,7 +525,8 @@ function handleBackgroundScroll(){
   const progress = clamp(scrolledThrough / revealDistance, 0, 1);
 
   const totalWords = wordSpans.length;
-  const revealCount = Math.floor(progress * totalWords);
+  const easedProgress = Math.pow(progress, 1.2); // apply easing for a slight delay
+  const revealCount = Math.floor(easedProgress * totalWords);
   
   // Debug on first few calls
   if (Math.floor(progress * 100) % 20 === 0) {
@@ -427,39 +544,7 @@ function handleBackgroundScroll(){
   
   // Check for keyword triggers after words are revealed - this ensures images appear as keywords are revealed
   checkKeywordTriggers();
-  
-  // Check if "lost" word is revealed - fade in last paragraph and button
-  // Find a span that contains the word 'lost' (works for single-word spans or
-  // multi-word phrase spans like "regenrative when lost" which were wrapped
-  // as a single span). We look for 'lost' as a substring in the normalized
-  // content and ensure that span is revealed.
-  const lostWord = wordSpans.find(span => {
-    const normalized = normalizedWord(span);
-    return normalized.includes('lost');
-  });
-  
-  const fadeLine = bgCopy.querySelector('.fade-line');
-  const fadeButton = bgCopy.querySelector('.fade-element');
-  
-  if (lostWord && lostWord.classList.contains('revealed')) {
-    // "lost" is revealed - fade in the paragraph
-    if (fadeLine) {
-      fadeLine.classList.add('faded-in');
-    }
-    // Fade in button slightly after paragraph starts fading
-    if (fadeButton && !buttonFadeInitiated) {
-      // Initiate button fade only once
-      buttonFadeInitiated = true;
-      setTimeout(() => {
-        fadeButton.classList.add('faded-in');
-      }, 300); // 300ms delay after paragraph starts fading
-    }
-  } else {
-    // Hide fade elements if "lost" not yet revealed
-    if (fadeLine) fadeLine.classList.remove('faded-in');
-    if (fadeButton) fadeButton.classList.remove('faded-in');
-    buttonFadeInitiated = false; // Reset flag when hiding
-  }
+  updateMediaForScroll();
 }
 
 // Initialize - try both DOMContentLoaded and load
@@ -518,11 +603,6 @@ if (scroller) {
 }
 window.addEventListener('resize', handleBackgroundScroll);
 
-// Begin button scroll
-document.getElementById('beginFromBg')?.addEventListener('click', () => {
-  document.querySelector('#scene')?.scrollIntoView({ behavior: 'smooth' });
-});
-
 /* ===== Photo upload preview ===== */
 const photoInput = document.getElementById('photoInput');
 const photoPreview = document.getElementById('photoPreview');
@@ -550,7 +630,7 @@ if (photoInput) {
             }
         };
         reader.readAsDataURL(file);
-    });
+  });
 }
 
 /* ===== Prompts (expand/collapse) - accessible interactive prompts ===== */
@@ -701,6 +781,141 @@ const reviewObserver = new IntersectionObserver(entries => {
 },{ threshold: 0.3 });
 reviewObserver.observe(reviewSection);
 
+/* ===== Hair trail effect ===== */
+(function initHairTrail(){
+  const canvas = document.getElementById('hairCanvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const hairs = [];
+  const colors = ['#1a1a1a', '#d1b16f', '#a3a7ab', '#8b5a2b', '#5f4631'];
+  const shapes = ['line', 'coil', 'wavy'];
+  let dpr = window.devicePixelRatio || 1;
+
+  function resizeCanvas(){
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function spawnHair(clientX, clientY){
+    const size = (12 + Math.random() * 20) * dpr;
+    const hair = {
+      x: clientX * dpr,
+      y: clientY * dpr,
+      vx: (Math.random() * 0.6 - 0.3) * dpr,
+      vy: (-Math.random() * 0.6) * dpr,
+      size,
+      rotation: (Math.random() * Math.PI / 2) - (Math.PI / 4),
+      color: colors[Math.floor(Math.random() * colors.length)],
+      shape: shapes[Math.floor(Math.random() * shapes.length)],
+      resting: false,
+      ground: canvas.height - (Math.random() * 40 * dpr)
+    };
+    hairs.push(hair);
+    if (hairs.length > 450) {
+      hairs.splice(0, hairs.length - 450);
+    }
+  }
+
+  function updateHair(hair){
+    if (!hair.resting) {
+      hair.vy += 0.18 * dpr;
+      hair.vx *= 0.99;
+      hair.x += hair.vx;
+      hair.y += hair.vy;
+
+      if (hair.y >= hair.ground) {
+        hair.y = hair.ground;
+        hair.vx *= 0.35;
+        hair.vy = 0;
+        hair.resting = true;
+      }
+
+      if (hair.x <= 0) hair.x = 0;
+      if (hair.x >= canvas.width) hair.x = canvas.width;
+    }
+  }
+
+  function drawHair(hair){
+    ctx.save();
+    ctx.translate(hair.x, hair.y);
+    ctx.rotate(hair.rotation);
+    ctx.strokeStyle = hair.color;
+    ctx.lineWidth = 1.4 * dpr;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    if (hair.shape === 'line') {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, -hair.size);
+      ctx.stroke();
+    } else if (hair.shape === 'coil') {
+      const turns = 3;
+      const steps = turns * 20;
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const angle = t * turns * Math.PI * 2;
+        const radius = (hair.size * 0.05) + t * (hair.size * 0.08);
+        const px = Math.cos(angle) * radius;
+        const py = -t * hair.size;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+          } else {
+      const segments = 18;
+      const amplitude = hair.size * 0.12;
+      ctx.beginPath();
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments;
+        const px = Math.sin(t * Math.PI * 3) * amplitude;
+        const py = -t * hair.size;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  function render(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < hairs.length; i++) {
+      updateHair(hairs[i]);
+      drawHair(hairs[i]);
+    }
+    requestAnimationFrame(render);
+  }
+
+  let lastSpawn = 0;
+  window.addEventListener('mousemove', (e) => {
+    const now = performance.now();
+    if (now - lastSpawn < 35) return;
+    lastSpawn = now;
+    const spawnCount = 1 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < spawnCount; i++) {
+      const jitterX = e.clientX + (Math.random() * 8 - 4);
+      const jitterY = e.clientY + (Math.random() * 8 - 4);
+      spawnHair(jitterX, jitterY);
+    }
+  }, { passive: true });
+
+  requestAnimationFrame(render);
+})();
+
+document.getElementById('beginFromBg')?.addEventListener('click', () => {
+  document.querySelector('#scene')?.scrollIntoView({ behavior: 'smooth' });
+});
+
 /* ===== Submit / Overlay ===== */
 // Generic overlay close handler (works for static and dynamically created buttons)
 function closeOverlay() {
@@ -793,119 +1008,3 @@ document.getElementById('downloadPDF')?.addEventListener('click', () => {
   win.print();
 });
 
-// Adjusting the fade-in duration for the elements
-const fadeInDuration = 1500; // Duration in milliseconds
-
-let keywordFound = false; // Track if a keyword was found
-
-function fadeInElements() {
-  // Add your fade-in logic here
-  // For example, you can add a class that triggers a CSS transition
-  bgVisuals.classList.add('fade-in');
-}
-
-// ...existing code...
-
-function checkKeywordTriggers(){
-  if (!bgCopy || wordSpans.length === 0) return;
-  
-  const words = wordSpans.map(normalizedWord);
-  keywordConfig.forEach(entry => {
-    if (triggeredKeys.has(entry.key)) return; // Already triggered
-    
-    // For multi-word keywords, check if all words in the phrase are revealed
-    const keyWords = entry.key.toLowerCase().split(/\s+/);
-    const keyTokens = keyWords.map(w => w.replace(/[^a-z0-9]+/g, ''));
-    
-    // Check if this is a multi-word phrase
-    if (keyWords.length > 1) {
-      // Find consecutive matching words
-      for (let i = 0; i <= words.length - keyTokens.length; i++) {
-        let allRevealed = true;
-        let allMatch = true;
-        
-        for (let j = 0; j < keyTokens.length; j++) {
-          if (!wordSpans[i+j] || !wordSpans[i+j].classList.contains('revealed')) {
-            allRevealed = false;
-            break;
-          }
-          if (words[i+j] !== keyTokens[j]) {
-            allMatch = false;
-            break;
-          }
-        }
-        
-        if (allRevealed && allMatch) {
-          console.log('Multi-word keyword triggered:', entry.key);
-          revealImagesForKey(entry);
-          triggeredKeys.add(entry.key);
-          keywordFound = true; // Set keyword found flag
-          return; // Exit the forEach loop
-        }
-      }
-      // Additional check: if the line was built as a single "phrase" span
-      // then the normalized stored word will be the concatenation of the words
-      // (e.g. "protectivewhenattached"). Detect that too.
-      const normalizedConcat = keyTokens.join('');
-      for (let i = 0; i < words.length; i++) {
-        if (words[i] === normalizedConcat && wordSpans[i].classList.contains('revealed')) {
-          console.log('Multi-word phrase (single-span) keyword triggered:', entry.key);
-          revealImagesForKey(entry);
-          triggeredKeys.add(entry.key);
-          keywordFound = true; // Set keyword found flag
-          return; // Exit the forEach loop
-        }
-      }
-    } else {
-      // Single word keyword - check each revealed word
-      const normalizedKey = entry.key.toLowerCase().replace(/[^a-z0-9]+/g, '');
-      
-      for (let i = 0; i < words.length; i++) {
-        if (wordSpans[i].classList.contains('revealed')) {
-          const wordText = wordSpans[i].textContent.toLowerCase();
-          const normalizedWord = words[i];
-          
-          // Check exact match first
-          if (normalizedWord === normalizedKey) {
-            console.log('Keyword triggered:', entry.key);
-            revealImagesForKey(entry);
-            triggeredKeys.add(entry.key);
-            keywordFound = true; // Set keyword found flag
-            return; // Exit the forEach loop
-          }
-          
-          // For numeric keywords like "50" or "100", check if they appear at word boundaries
-          if (/^\d+$/.test(entry.key)) {
-            const startsWithPattern = new RegExp('^' + entry.key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:-|$)');
-            const endsWithPattern = new RegExp('(?:^|-)' + entry.key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$');
-            
-            if (wordText.match(startsWithPattern) || wordText.match(endsWithPattern)) {
-              console.log('Keyword triggered:', entry.key, 'in word:', wordText);
-              revealImagesForKey(entry);
-              triggeredKeys.add(entry.key);
-              keywordFound = true; // Set keyword found flag
-              return; // Exit the forEach loop
-            }
-          } else {
-            // For non-numeric keywords, use substring matching
-            if (normalizedWord.includes(normalizedKey)) {
-              console.log('Keyword triggered:', entry.key);
-              revealImagesForKey(entry);
-              triggeredKeys.add(entry.key);
-              keywordFound = true; // Set keyword found flag
-              return; // Exit the forEach loop
-            }
-          }
-        }
-      }
-    }
-  });
-  
-  // If a keyword was found, fade in the elements
-  if (keywordFound) {
-    // Fade in the elements with a delay
-    setTimeout(() => {
-      fadeInElements();
-    }, fadeInDuration);
-  }
-}
