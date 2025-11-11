@@ -1,3 +1,18 @@
+@font-face {
+  font-family: 'NeueHaasGrotesk65';
+  src: url('fonts/neuehaasgrottext-65medium-trial.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PPEditorialNew';
+  src: url('fonts/PPEditorialNew-Regular-BF644b214ff145f.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root{
   --ink:#111;
@@ -8,9 +23,13 @@
 }
 html, body { height: 100%; }
 body {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'NeueHaasGrotesk65', 'Cormorant Garamond', serif;
   background: var(--paper);
   color: var(--ink);
+}
+
+h1, h2, .eyebrow, .hint, .btn {
+  font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
 }
 
 /* ----- Scroll snap container ----- */
@@ -100,7 +119,7 @@ p { font-size: 1.1rem; line-height: 1.6; text-align: center; }
 
 /* ----- Unified Buttons ----- */
 .btn{
-  font-family: inherit;
+  font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
   font-size: 1rem;
   line-height: 1.2;
   padding: 10px 20px;

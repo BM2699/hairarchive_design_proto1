@@ -111,6 +111,8 @@ let currentMediaKey = null;
 let currentBlurSpans = [];
 let wordSpans = [];
 const mediaCache = new Map();
+const hairBurstTargets = { '50': 50, '100': 100 };
+const hairBurstsTriggered = new Set();
 
 function buildWordSpans(){
   if (!bgCopy) {
@@ -422,12 +424,12 @@ function findKeywordMatch(entry, words){
         }
         spans.push(wordSpans[i+j]);
       }
-      if (allMatch) return spans;
+      if (allMatch) return { spans, index: i, length: keyTokens.length };
     }
     const normalizedConcat = keyTokens.join('');
     for (let i = 0; i < words.length; i++) {
       if (words[i] === normalizedConcat && wordSpans[i].classList.contains('revealed')) {
-        return [wordSpans[i]];
+        return { spans: [wordSpans[i]], index: i, length: 1 };
       }
     }
   } else {
@@ -436,16 +438,16 @@ function findKeywordMatch(entry, words){
       const span = wordSpans[i];
       if (!span || !span.classList.contains('revealed')) continue;
       const wordText = span.textContent.toLowerCase();
-      const normalizedWord = words[i];
-      if (normalizedWord === normalizedKey) return [span];
+      const normalizedWordVal = words[i];
+      if (normalizedWordVal === normalizedKey) return { spans: [span], index: i, length: 1 };
 
       if (/^\d+$/.test(entry.key)) {
         const escaped = entry.key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const startsWithPattern = new RegExp('^' + escaped + '(?:-|$)');
         const endsWithPattern = new RegExp('(?:^|-)' + escaped + '$');
-        if (wordText.match(startsWithPattern) || wordText.match(endsWithPattern)) return [span];
-      } else if (normalizedWord.includes(normalizedKey)) {
-        return [span];
+        if (wordText.match(startsWithPattern) || wordText.match(endsWithPattern)) return { spans: [span], index: i, length: 1 };
+      } else if (normalizedWordVal.includes(normalizedKey)) {
+        return { spans: [span], index: i, length: 1 };
       }
     }
   }
@@ -456,22 +458,29 @@ function updateMediaForScroll(){
   if (!bgCopy || wordSpans.length === 0) return;
   const words = wordSpans.map(normalizedWord);
   let activeEntry = null;
-  let activeSpans = null;
+  let activeMatch = null;
+  const matchedKeys = new Set();
 
   keywordConfig.forEach(entry => {
-    const spans = findKeywordMatch(entry, words);
-    if (spans) {
+    const match = findKeywordMatch(entry, words);
+    if (match) {
+      matchedKeys.add(entry.key);
       activeEntry = entry;
-      activeSpans = spans;
+      activeMatch = match;
     }
   });
 
-  if (activeEntry) {
-    setBlurForSpans(activeSpans);
+  Object.keys(hairBurstTargets).forEach(key => {
+    if (!matchedKeys.has(key)) hairBurstsTriggered.delete(key);
+  });
+
+  if (activeEntry && activeMatch) {
+    setBlurForSpans(activeMatch.spans);
     bgVisuals?.classList.add('fade-in');
     if (currentMediaKey !== activeEntry.key) {
       revealImagesForKey(activeEntry);
     }
+    triggerHairBurst(activeEntry.key, activeMatch);
   } else if (currentMediaKey) {
     clearVisualMedia();
     bgVisuals?.classList.remove('fade-in');
@@ -480,6 +489,22 @@ function updateMediaForScroll(){
     bgVisuals?.classList.remove('fade-in');
     setBlurForSpans();
   }
+}
+
+function triggerHairBurst(key, match){
+  const count = hairBurstTargets[key];
+  if (!count) return;
+  if (hairBurstsTriggered.has(key)) return;
+  const spawn = window.__spawnHairBurst;
+  if (typeof spawn !== 'function') return;
+  const spans = match?.spans || [];
+  if (spans.length === 0) return;
+  const firstRect = spans[0].getBoundingClientRect();
+  const lastRect = spans[spans.length - 1].getBoundingClientRect();
+  const startX = (firstRect.left + lastRect.right) / 2;
+  const startY = (firstRect.top + lastRect.bottom) / 2;
+  hairBurstsTriggered.add(key);
+  spawn(startX, startY, count);
 }
 
 function handleBackgroundScroll(){
@@ -763,8 +788,7 @@ const reviewObserver = new IntersectionObserver(entries => {
           reviewContainer.appendChild(div);
         }
       });
-      
-      // Gather all connection* textareas with full prompt text
+
       const connectionTextareas = Array.from(document.querySelectorAll('textarea[id^="connectionText"]'));
       connectionTextareas.forEach(ta => {
         const val = ta.value.trim();
@@ -780,6 +804,76 @@ const reviewObserver = new IntersectionObserver(entries => {
   });
 },{ threshold: 0.3 });
 reviewObserver.observe(reviewSection);
+
+/* ===== Submit / Overlay ===== */
+document.getElementById('submitArchive')?.addEventListener('click', async () => {
+  const submitBtn = document.getElementById('submitArchive');
+  const overlay = document.getElementById('overlay');
+  const overlayContent = overlay.querySelector('.overlayContent');
+  
+  if (!uploadedFile) {
+    alert('Please upload an image before submitting.');
+    return;
+  }
+  
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  
+  try {
+    const origin = document.getElementById('originText')?.value.trim() || null;
+    const emotion = document.getElementById('emotionText')?.value.trim() || null;
+    const connection = document.getElementById('connectionText')?.value.trim() || null;
+    const connection_1 = document.getElementById('connectionText-1')?.value.trim() || null;
+    const connection_2 = document.getElementById('connectionText-2')?.value.trim() || null;
+    const connection_3 = document.getElementById('connectionText-3')?.value.trim() || null;
+    const connection_4 = document.getElementById('connectionText-4')?.value.trim() || null;
+    const connection_5 = document.getElementById('connectionText-5')?.value.trim() || null;
+    
+    if (!window.supabaseClient) {
+      throw new Error('Supabase client not initialized. Please check your Supabase configuration.');
+    }
+    
+    const result = await window.supabaseClient.submitArchive({
+      file: uploadedFile,
+      origin,
+      emotion,
+      connection,
+      connection_1,
+      connection_2,
+      connection_3,
+      connection_4,
+      connection_5
+    });
+    
+    console.log('Archive submitted successfully:', result);
+    overlayContent.innerHTML = '<p>Your strand has joined the archive.</p><button id="closeOverlay" class="btn primary">Close</button>';
+    overlay.style.display = 'flex';
+    document.getElementById('closeOverlay')?.addEventListener('click', closeOverlay);
+  } catch (error) {
+    console.error('Error submitting to archive:', error);
+    overlayContent.innerHTML = `<p>Error: ${error.message || 'Failed to submit to archive. Please try again.'}</p><button id="closeOverlay" class="btn primary">Close</button>`;
+    overlay.style.display = 'flex';
+    document.getElementById('closeOverlay')?.addEventListener('click', closeOverlay);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Release to Archive';
+  }
+});
+
+document.getElementById('closeOverlay')?.addEventListener('click', closeOverlay);
+
+/* ===== Keep for Myself (lightweight print-to-PDF) ===== */
+document.getElementById('downloadPDF')?.addEventListener('click', () => {
+  const win = window.open('', 'PRINT', 'height=650,width=900,top=100,left=150');
+  win.document.write('<html><head><title>Your Strand</title></head><body>');
+  win.document.write('<h2 style="font-family: Cormorant Garamond, serif;">Your Hair Archive Reflection</h2>');
+  reviewContainer.querySelectorAll('.reviewItem').forEach(item => {
+    win.document.write(item.outerHTML);
+  });
+  win.document.write('</body></html>');
+  win.document.close();
+  win.print();
+});
 
 /* ===== Hair trail effect ===== */
 (function initHairTrail(){
@@ -822,6 +916,14 @@ reviewObserver.observe(reviewSection);
       hairs.splice(0, hairs.length - 450);
     }
   }
+
+  window.__spawnHairBurst = function(x, y, count){
+    for (let i = 0; i < count; i++) {
+      const jitterX = x + (Math.random() * 15 - 7.5);
+      const jitterY = y + (Math.random() * 10 - 5);
+      spawnHair(jitterX, jitterY);
+    }
+  };
 
   function updateHair(hair){
     if (!hair.resting) {
@@ -870,7 +972,7 @@ reviewObserver.observe(reviewSection);
         else ctx.lineTo(px, py);
       }
       ctx.stroke();
-          } else {
+    } else {
       const segments = 18;
       const amplitude = hair.size * 0.12;
       ctx.beginPath();
@@ -915,96 +1017,3 @@ reviewObserver.observe(reviewSection);
 document.getElementById('beginFromBg')?.addEventListener('click', () => {
   document.querySelector('#scene')?.scrollIntoView({ behavior: 'smooth' });
 });
-
-/* ===== Submit / Overlay ===== */
-// Generic overlay close handler (works for static and dynamically created buttons)
-function closeOverlay() {
-  document.getElementById('overlay').style.display = 'none';
-}
-
-// Attach to initial close button
-document.getElementById('closeOverlay')?.addEventListener('click', closeOverlay);
-
-// Submit handler
-document.getElementById('submitArchive')?.addEventListener('click', async () => {
-  const submitBtn = document.getElementById('submitArchive');
-  const overlay = document.getElementById('overlay');
-  const overlayContent = overlay.querySelector('.overlayContent');
-  
-  // Validate that we have an image
-  if (!uploadedFile) {
-    alert('Please upload an image before submitting.');
-    return;
-  }
-  
-  // Disable button and show loading state
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Submitting...';
-  
-  try {
-    // Collect all 8 prompt responses separately
-    const origin = document.getElementById('originText')?.value.trim() || null;
-    const emotion = document.getElementById('emotionText')?.value.trim() || null;
-    const connection = document.getElementById('connectionText')?.value.trim() || null;
-    const connection_1 = document.getElementById('connectionText-1')?.value.trim() || null;
-    const connection_2 = document.getElementById('connectionText-2')?.value.trim() || null;
-    const connection_3 = document.getElementById('connectionText-3')?.value.trim() || null;
-    const connection_4 = document.getElementById('connectionText-4')?.value.trim() || null;
-    const connection_5 = document.getElementById('connectionText-5')?.value.trim() || null;
-    
-    // Check if Supabase client is available
-    if (!window.supabaseClient) {
-      throw new Error('Supabase client not initialized. Please check your Supabase configuration.');
-    }
-    
-    // Submit to Supabase with all 8 prompt responses
-    const result = await window.supabaseClient.submitArchive({
-      file: uploadedFile,
-      origin: origin,
-      emotion: emotion,
-      connection: connection,
-      connection_1: connection_1,
-      connection_2: connection_2,
-      connection_3: connection_3,
-      connection_4: connection_4,
-      connection_5: connection_5
-    });
-    
-    console.log('Archive submitted successfully:', result);
-    
-    // Show success overlay
-    overlayContent.innerHTML = '<p>Your strand has joined the archive.</p><button id="closeOverlay" class="btn primary">Close</button>';
-    overlay.style.display = 'flex';
-    
-    // Re-attach close handler to dynamically created button
-    document.getElementById('closeOverlay')?.addEventListener('click', closeOverlay);
-    
-  } catch (error) {
-    console.error('Error submitting to archive:', error);
-    
-    // Show error message
-    overlayContent.innerHTML = `<p>Error: ${error.message || 'Failed to submit to archive. Please try again.'}</p><button id="closeOverlay" class="btn primary">Close</button>`;
-    overlay.style.display = 'flex';
-    
-    // Re-attach close handler to dynamically created button
-    document.getElementById('closeOverlay')?.addEventListener('click', closeOverlay);
-  } finally {
-    // Re-enable button
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Release to Archive';
-  }
-});
-
-/* ===== Keep for Myself (lightweight print-to-PDF) ===== */
-document.getElementById('downloadPDF')?.addEventListener('click', () => {
-  const win = window.open('', 'PRINT', 'height=650,width=900,top=100,left=150');
-  win.document.write('<html><head><title>Your Strand</title></head><body>');
-  win.document.write('<h2 style="font-family: Cormorant Garamond, serif;">Your Hair Archive Reflection</h2>');
-  reviewContainer.querySelectorAll('.reviewItem').forEach(item => {
-    win.document.write(item.outerHTML);
-  });
-  win.document.write('</body></html>');
-  win.document.close();
-  win.print();
-});
-
