@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Archive - Hair Archive</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header id="mainHeader" class="main-header">
+    <a href="#" class="header-link header-link-left" id="infoLink">info</a>
+    <div class="header-logo-container">
+      <img src="images/pdev_logo.png" alt="Logo" class="header-logo">
+    </div>
+    <a href="#" class="header-link header-link-right" id="joinLink">join</a>
+  </header>
+  <main id="archiveMain">
+    <!-- About Section -->
+    <section id="about" class="section scroll-snap-section">
+      <div class="about-content">
+        <h1>About the Archive</h1>
+        <div class="about-text">
+          <p>Shed Hair Archive is a collective experiment investigating shed hair as an extension of identity through the lens of auto-ethnography and epigenetics.</p>
+          <p>Each submission represents a personal narrative, exploring the connections between our physical traces and our inherited traits, memories, and sense of self.</p>
+          <p>Through this archive, we examine how something as seemingly mundane as a fallen strand can carry profound meaning—connecting us to our ancestors, our environments, and our evolving identities.</p>
+        </div>
+        <a href="index.html" class="btn primary" style="margin-top: 2em;">Join the Archive</a>
+      </div>
+      
+      <!-- Fixed Header at bottom when About section is in view -->
+      <div class="archive-list-header archive-header-bottom">
+        <h1 class="archive-list-title">Inherited Trait</h1>
+        <h1 class="archive-list-title">Location/Source</h1>
+        <h1 class="archive-list-title">Date of Sample</h1>
+      </div>
+    </section>
+
+    <!-- Archive Grid Section -->
+    <section id="archiveGrid" class="section scroll-snap-section">
+      <!-- Fixed Header at top when Archive section is in view -->
+      <div class="archive-list-header archive-header-top">
+        <h1 class="archive-list-title">Inherited Trait</h1>
+        <h1 class="archive-list-title">Location/Source</h1>
+        <h1 class="archive-list-title">Date of Sample</h1>
+      </div>
+      
+      <div class="archive-list-container">
+        <div id="archiveContainer" class="archive-list">
+          <p style="text-align: center; color: var(--ink); padding: 2rem;">Loading archive items...</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Fixed Preview Image Container (shows outline on hover, centered) -->
+  <div id="previewImageContainer" class="preview-image-container">
+    <img id="previewImage" src="" alt="" style="display: none;">
+  </div>
+
+  <!-- Image Modal (shows original on click) -->
+  <div id="imageModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <img id="modalImage" src="" alt="">
+      <div id="modalInfo" class="modal-info"></div>
+    </div>
+  </div>
+
+  <canvas id="hairCanvas"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    window.SUPABASE_URL = 'https://cphqjbvwmrzbrvjkyned.supabase.co';
+    window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwaHFqYnZ3bXJ6YnJ2amt5bmVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNjg3MTMsImV4cCI6MjA3Nzg0NDcxM30.C6bthui6fjKoDgQ9ZKaBLBLo0rDxgcffI7b4j40xVCU';
+  </script>
+  <script src="archive-script.js"></script>
+</body>
+</html>
+

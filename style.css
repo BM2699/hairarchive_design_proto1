@@ -1,6 +1,13 @@
 @font-face {
-  font-family: 'NeueHaasGrotesk65';
-  src: url('fonts/neuehaasgrottext-65medium-trial.otf') format('opentype');
+  font-family: 'ABCMonumentGrotesk';
+  src: url('fonts/ABCMonumentGrotesk-Regular-Trial.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'ABCMonumentGrotesk';
+  src: url('fonts/ABCMonumentGrotesk-Medium-Trial.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -23,13 +30,76 @@
 }
 html, body { height: 100%; }
 body {
-  font-family: 'NeueHaasGrotesk65', 'Cormorant Garamond', serif;
+  font-family: 'ABCMonumentGrotesk', sans-serif;
   background: var(--paper);
   color: var(--ink);
 }
 
 h1, h2, .eyebrow, .hint, .btn {
   font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
+}
+
+/* ----- Main Header ----- */
+.main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 2rem;
+  background: transparent;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+  gap: 1.5rem;
+}
+
+.header-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.header-logo {
+  height: auto;
+  max-height: 40px;
+  width: auto;
+  display: block;
+}
+
+.header-link {
+  font-family: 'ABCMonumentGrotesk', sans-serif;
+  font-size: 0.875rem;
+  color: var(--ink);
+  text-decoration: none;
+  text-transform: lowercase;
+  opacity: 0;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  z-index: 1002;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  position: relative;
+  border: none;
+  overflow: hidden;
+  /* Clump of hair background - dense overlapping strands */
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg stroke='%23111' stroke-width='0.4' fill='none' opacity='0.5'%3E%3Cpath d='M5,10 L18,15 M8,20 L22,12 M12,30 L26,22 M15,40 L29,32 M18,50 L32,42'/%3E%3Cpath d='M10,8 L25,13 M13,18 L28,10 M16,28 L31,20 M19,38 L34,30 M22,48 L37,40'/%3E%3Cpath d='M15,6 L30,11 M18,16 L33,8 M21,26 L36,18 M24,36 L39,28 M27,46 L42,38'/%3E%3Cpath d='M20,4 L35,9 M23,14 L38,6 M26,24 L41,16 M29,34 L44,26 M32,44 L47,36'/%3E%3Cpath d='M25,2 L40,7 M28,12 L43,4 M31,22 L46,14 M34,32 L49,24 M37,42 L52,34'/%3E%3Cpath d='M8,15 L12,28 M11,25 L15,38 M14,35 L18,48 M17,45 L21,58'/%3E%3Cpath d='M18,13 L22,26 M21,23 L25,36 M24,33 L28,46 M27,43 L31,56'/%3E%3Cpath d='M28,11 L32,24 M31,21 L35,34 M34,31 L38,44 M37,41 L41,54'/%3E%3Cpath d='M38,9 L42,22 M41,19 L45,32 M44,29 L48,42 M47,39 L51,52'/%3E%3Cpath d='M6,12 L14,25 M9,22 L17,35 M12,32 L20,45 M15,42 L23,55'/%3E%3Cpath d='M16,10 L24,23 M19,20 L27,33 M22,30 L30,43 M25,40 L33,53'/%3E%3Cpath d='M26,8 L34,21 M29,18 L37,31 M32,28 L40,41 M35,38 L43,51'/%3E%3Cpath d='M36,6 L44,19 M39,16 L47,29 M42,26 L50,39 M45,36 L53,49'/%3E%3Cpath d='M10,5 L20,18 M13,15 L23,28 M16,25 L26,38 M19,35 L29,48 M22,45 L32,58'/%3E%3Cpath d='M20,3 L30,16 M23,13 L33,26 M26,23 L36,36 M29,33 L39,46 M32,43 L42,56'/%3E%3Cpath d='M30,1 L40,14 M33,11 L43,24 M36,21 L46,34 M39,31 L49,44 M42,41 L52,54'/%3E%3Cpath d='M40,-1 L50,12 M43,9 L53,22 M46,19 L56,32 M49,29 L59,42 M52,39 L62,52'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Cg stroke='%23111' stroke-width='0.3' fill='none' opacity='0.4'%3E%3Cpath d='M3,8 L15,12 M6,18 L19,10 M10,28 L23,20 M13,38 L26,30 M16,48 L29,40'/%3E%3Cpath d='M8,6 L21,10 M11,16 L24,8 M14,26 L27,18 M17,36 L30,28 M20,46 L33,38'/%3E%3Cpath d='M13,4 L26,8 M16,14 L29,6 M19,24 L32,16 M22,34 L35,26 M25,44 L38,36'/%3E%3Cpath d='M18,2 L31,6 M21,12 L34,4 M24,22 L37,14 M27,32 L40,24 M30,42 L43,34'/%3E%3Cpath d='M5,10 L10,22 M8,20 L13,32 M11,30 L16,42 M14,40 L19,52'/%3E%3Cpath d='M15,8 L20,20 M18,18 L23,30 M21,28 L26,40 M24,38 L29,50'/%3E%3Cpath d='M25,6 L30,18 M28,16 L33,28 M31,26 L36,38 M34,36 L39,48'/%3E%3Cpath d='M35,4 L40,16 M38,14 L43,26 M41,24 L46,36 M44,34 L49,46'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 60px 60px, 50px 50px;
+  background-repeat: repeat;
+  background-position: 0 0, 10px 10px;
+  background-color: rgba(247, 247, 247, 0.4);
+}
+
+.main-header:hover .header-link {
+  opacity: 1;
+}
+
+.header-link:hover {
+  filter: blur(3px);
+  text-decoration: none;
 }
 
 /* ----- Scroll snap container ----- */
@@ -151,6 +221,15 @@ p { font-size: 1.1rem; line-height: 1.6; text-align: center; }
 #landing h1 span{
   cursor: pointer;
   border-bottom: 1px solid #bbb;
+}
+
+.landing-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  flex-wrap: wrap;
 }
 /* Scroll arrow - animated guide for scrolling */
 .scroll-arrow{
@@ -579,7 +658,470 @@ div.bg-visuals div.visItem.visible {
   width: 100vw;
   height: 100vh;
   pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== Archive Page Styles ===== */
+/* Archive Page Styles */
+#archiveMain {
+  min-height: 100vh;
+  padding: 0;
+  padding-top: 80px; /* Space for fixed header */
+  position: relative;
+  z-index: 1;
+  background: var(--paper);
+  width: 100%;
+  max-width: none;
+}
+
+/* Scroll Snap Container */
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.scroll-snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  min-height: 100vh;
+}
+
+/* About Section */
+#about.section {
+  min-height: 100vh;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8vh 10vw 120px 10vw; /* Extra padding at bottom for header */
+  position: relative;
+  z-index: 1;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.about-content {
+  max-width: min(800px, 90%);
+  text-align: center;
+  position: relative;
   z-index: 2;
+  color: var(--ink);
+}
+
+.about-content h1 {
+  font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: 2rem;
+  color: var(--ink) !important;
+}
+
+.about-text {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  color: var(--ink) !important;
+}
+
+.about-text p {
+  margin-bottom: 1.5rem;
+  text-align: left;
+  color: var(--ink) !important;
+}
+
+/* Archive Grid Section */
+#archiveGrid {
+  min-height: auto;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  display: block !important;
+  background: var(--paper);
+  width: 100%;
+}
+
+.archive-header {
+  display: none; /* Remove header, use inline header row instead */
+}
+
+/* Archive List Layout (Haus Otto style) */
+.archive-list-container {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.archive-list-header {
+  display: grid;
+  grid-template-columns: 1fr 340px 160px; /* Inherited Trait, Location/Source, Date of Sample */
+  gap: 0;
+  padding: 0;
+  margin-bottom: 0;
+  background: var(--paper);
+  z-index: 10;
+}
+
+.archive-list-header .archive-list-title {
+  padding: 1rem 0.5rem 0.75rem 0.5rem;
+}
+
+/* Header at bottom when About section is in view */
+.archive-header-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.archive-header-bottom .archive-list-title {
+  padding: 1rem 0.5rem;
+}
+
+/* Header at top when Archive section is in view */
+.archive-header-top {
+  position: sticky;
+  top: 0;
+}
+
+.archive-header-top .archive-list-title {
+  padding: 1rem 0.5rem 0.75rem 0.5rem;
+}
+
+.archive-list-title {
+  font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
+  font-size: 0.8125rem; /* 13px - matches reference */
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink) !important;
+  margin: 0;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.archive-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.archive-list-item {
+  display: grid;
+  grid-template-columns: 1fr 340px 160px; /* Inherited Trait, Location/Source, Date of Sample */
+  gap: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  align-items: start;
+  position: relative;
+}
+
+/* Default archive cell styling */
+.archive-cell {
+  font-size: 1.40625rem; /* 22.5px - matches reference */
+  line-height: 1.5;
+  color: var(--ink); /* No !important - allows state styles to override */
+  word-break: break-word;
+  font-weight: 400;
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+}
+
+/* Dimmed state: grey text (must come after default to override) */
+.archive-list-item.dimmed .archive-cell {
+  color: var(--muted) !important;
+}
+
+/* Ensure dimmed state applies to all cell types including first-of-type */
+.archive-list-item.dimmed .archive-cell:first-of-type {
+  color: var(--muted) !important;
+}
+
+/* Active state: black text for clicked item (must come after dimmed to override) */
+.archive-list-item.active .archive-cell,
+.archive-list-item.active .archive-cell:first-of-type {
+  color: var(--ink) !important;
+}
+
+/* Hovered state: black text for hovered item (must come after dimmed to override) */
+.archive-list-item.hovered .archive-cell {
+  color: var(--ink) !important;
+}
+
+.archive-cell:first-of-type {
+  font-family: 'ABCMonumentGrotesk', sans-serif;
+  font-weight: 400;
+  font-size: 1.40625rem; /* 22.5px - matches reference */
+  line-height: 1.5;
+  /* Color is inherited from parent state classes */
+}
+
+/* Fixed Preview Image Container (centered on screen) */
+.preview-image-container {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 50vw;
+  max-width: 600px;
+  max-height: 80vh;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-image-container.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.preview-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Responsive Archive List */
+@media (max-width: 1200px) {
+  .archive-list-header,
+  .archive-list-item {
+    grid-template-columns: 1fr 240px 150px; /* Inherited Trait, Location/Source, Date of Sample */
+  }
+  
+  .preview-image-container {
+    width: 60vw;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 900px) {
+  .preview-image-container {
+    width: 70vw;
+    max-width: 400px;
+  }
+  
+  .archive-list-header,
+  .archive-list-item {
+    grid-template-columns: 1fr 100px; /* Inherited Trait, Location/Source (hide Date) */
+  }
+  
+  /* Hide Date of Sample column on smaller screens */
+  .archive-list-header .archive-list-title:nth-child(3),
+  .archive-list-item .archive-cell:nth-child(3) {
+    display: none;
+  }
+  
+  .archive-list-header .archive-list-title,
+  .archive-cell {
+    padding: 1rem 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .archive-list-container {
+    padding: 0 16px;
+  }
+  
+  .archive-list-header,
+  .archive-list-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 1rem 0;
+  }
+  
+  .archive-list-header {
+    position: relative;
+    padding: 1rem 0 0.5rem 0;
+  }
+  
+  .archive-list-title {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .archive-cell {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+  
+  .archive-cell:first-of-type {
+    font-size: 0.8125rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .preview-image-container {
+    display: none; /* Hide preview on mobile */
+  }
+}
+
+/* Image Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent; /* No black overlay */
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  position: relative;
+  width: 50vw;
+  max-width: 600px;
+  max-height: 80vh;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  animation: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto; /* Allow interaction with content */
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: -2.5rem;
+  right: 0;
+  color: var(--ink);
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 1001;
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+}
+
+.modal-close:hover {
+  opacity: 0.7;
+}
+
+#modalImage {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.modal-info {
+  display: none; /* Hide modal info */
+}
+
+.modal-info h3 {
+  font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-info p {
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+}
+
+.modal-info strong {
+  font-weight: 600;
+}
+
+/* Responsive Modal - match preview image container sizes */
+@media (max-width: 1200px) {
+  .modal-content {
+    width: 60vw;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 900px) {
+  .modal-content {
+    width: 70vw;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    width: 80vw;
+    max-width: 350px;
+  }
+  
+  .modal-close {
+    top: -2rem;
+    font-size: 1.25rem;
+  }
+  
+  .main-header {
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+  }
+  
+  .header-logo {
+    max-height: 30px;
+  }
+  
+  .header-link {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  #archiveMain {
+    padding-top: 60px;
+  }
+}
+
+/* Responsive Archive */
+@media (max-width: 900px) {
+  .archive-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .about-text p {
+    text-align: center;
+  }
 }
 
 /* Responsive tweaks */

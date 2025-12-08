@@ -31,6 +31,11 @@ investigateBtn.addEventListener('click', () => {
   document.querySelector('#background').scrollIntoView({ behavior: 'smooth' });
 });
 
+// Join button - scroll to intro callout section
+document.getElementById('joinArchive')?.addEventListener('click', () => {
+  document.querySelector('#introCallout')?.scrollIntoView({ behavior: 'smooth' });
+});
+
 /* down-arrow removed */
 
 /* ===== Section 2: Scroll reveal (copy only) ===== */
@@ -972,7 +977,7 @@ document.getElementById('downloadPDF')?.addEventListener('click', () => {
         else ctx.lineTo(px, py);
       }
       ctx.stroke();
-    } else {
+          } else {
       const segments = 18;
       const amplitude = hair.size * 0.12;
       ctx.beginPath();
