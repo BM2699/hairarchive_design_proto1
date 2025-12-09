@@ -18,6 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const fromArchiveSession = urlParams.get('from') === 'archive' || sessionStorage.getItem('fromArchive');
   
   if (fromArchiveSession) {
+    // Make sure main content is visible
+    const scroller = document.getElementById('scroller');
+    if (scroller) {
+      scroller.style.display = 'block';
+    }
+    
     // Add class to body for CSS targeting
     document.body.classList.add('from-archive');
     
@@ -39,13 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
       introCallout.style.visibility = 'hidden';
     }
     
-    // Scroll to "Set the Scene" section after transition
+    // Scroll to "Set the Scene" section after a brief delay
     const sceneSection = document.getElementById('scene');
     if (sceneSection) {
-      // Wait for transition to complete
+      // Wait a bit for page to render
       setTimeout(() => {
         sceneSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 2000); // Wait for transition animation
+      }, 500); // Reduced delay since no transition
     }
     
     // Clear the flag

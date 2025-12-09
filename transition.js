@@ -21,6 +21,16 @@
   }
   
   // Only run on initial page load (not on navigation)
+  // If coming from archive (JOIN button), don't show transition and don't redirect
+  if (fromArchive) {
+    const overlay = document.getElementById('transitionOverlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+    }
+    document.body.classList.remove('transitioning');
+    return; // Don't show transition when coming from archive
+  }
+  
   if (sessionStorage.getItem('transitionShown')) {
     // Hide overlay immediately if transition was already shown in this session
     const overlay = document.getElementById('transitionOverlay');
@@ -30,11 +40,11 @@
     document.body.classList.remove('transitioning');
     
     // If we should redirect, do it now
-    // Check both the flag and the URL path
-    const shouldRedirect = window.shouldRedirectToArchive || 
+    // Check both the flag and the URL path, but NOT if coming from archive
+    const shouldRedirect = (window.shouldRedirectToArchive || 
                           (window.location.pathname === '/' || 
                            window.location.pathname.endsWith('/index.html') ||
-                           window.location.href.endsWith('/'));
+                           window.location.href.endsWith('/'))) && !fromArchive;
     if (shouldRedirect && !window.location.pathname.includes('archive.html')) {
       window.location.replace('archive.html');
     }
@@ -83,10 +93,11 @@
         document.body.classList.remove('transitioning');
         
         // Redirect to archive.html if we're on the root/index page
-        const shouldRedirect = window.shouldRedirectToArchive || 
+        // BUT NOT if coming from archive (JOIN button)
+        const shouldRedirect = (window.shouldRedirectToArchive || 
                               (window.location.pathname === '/' || 
                                window.location.pathname.endsWith('/index.html') ||
-                               window.location.href.endsWith('/'));
+                               window.location.href.endsWith('/'))) && !fromArchive;
         if (shouldRedirect && !window.location.pathname.includes('archive.html')) {
           window.location.replace('archive.html');
           return;
@@ -120,10 +131,11 @@
             document.body.classList.remove('transitioning');
             
             // Redirect to archive.html if we're on the root/index page
-            const shouldRedirect = window.shouldRedirectToArchive || 
+            // BUT NOT if coming from archive (JOIN button)
+            const shouldRedirect = (window.shouldRedirectToArchive || 
                                   (window.location.pathname === '/' || 
                                    window.location.pathname.endsWith('/index.html') ||
-                                   window.location.href.endsWith('/'));
+                                   window.location.href.endsWith('/'))) && !fromArchive;
             if (shouldRedirect && !window.location.pathname.includes('archive.html')) {
               window.location.replace('archive.html');
               return;
