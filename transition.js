@@ -3,12 +3,16 @@
 
 (function() {
   // Check if we should redirect to archive (root page)
-  const isRoot = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
+  const isRoot = window.location.pathname === '/' || 
+                 window.location.pathname.endsWith('/index.html') ||
+                 window.location.pathname.endsWith('/');
   const urlParams = new URLSearchParams(window.location.search);
   const fromArchive = urlParams.get('from') === 'archive';
+  const isArchivePage = window.location.pathname.includes('archive.html');
   
-  // If on root and not coming from archive, hide main content and show transition
-  if (isRoot && !fromArchive) {
+  // If on root/index page and not coming from archive, hide main content and show transition
+  // Then redirect to archive.html after transition
+  if ((isRoot || window.location.href.endsWith('/')) && !fromArchive && !isArchivePage) {
     const scroller = document.getElementById('scroller');
     if (scroller) {
       scroller.style.display = 'none';
@@ -26,7 +30,12 @@
     document.body.classList.remove('transitioning');
     
     // If we should redirect, do it now
-    if (window.shouldRedirectToArchive) {
+    // Check both the flag and the URL path
+    const shouldRedirect = window.shouldRedirectToArchive || 
+                          (window.location.pathname === '/' || 
+                           window.location.pathname.endsWith('/index.html') ||
+                           window.location.href.endsWith('/'));
+    if (shouldRedirect && !window.location.pathname.includes('archive.html')) {
       window.location.replace('archive.html');
     }
     return;
@@ -73,9 +82,14 @@
         overlay.classList.add('hidden');
         document.body.classList.remove('transitioning');
         
-        // Redirect to archive.html if we're on the root page
-        if (window.shouldRedirectToArchive) {
+        // Redirect to archive.html if we're on the root/index page
+        const shouldRedirect = window.shouldRedirectToArchive || 
+                              (window.location.pathname === '/' || 
+                               window.location.pathname.endsWith('/index.html') ||
+                               window.location.href.endsWith('/'));
+        if (shouldRedirect && !window.location.pathname.includes('archive.html')) {
           window.location.replace('archive.html');
+          return;
         }
       }, fadeDuration);
       return;
@@ -105,9 +119,14 @@
             overlay.classList.add('hidden');
             document.body.classList.remove('transitioning');
             
-            // Redirect to archive.html if we're on the root page
-            if (window.shouldRedirectToArchive) {
+            // Redirect to archive.html if we're on the root/index page
+            const shouldRedirect = window.shouldRedirectToArchive || 
+                                  (window.location.pathname === '/' || 
+                                   window.location.pathname.endsWith('/index.html') ||
+                                   window.location.href.endsWith('/'));
+            if (shouldRedirect && !window.location.pathname.includes('archive.html')) {
               window.location.replace('archive.html');
+              return;
             }
           }, fadeDuration);
         }, wordDisplayDuration);
