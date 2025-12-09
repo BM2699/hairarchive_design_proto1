@@ -2,6 +2,20 @@
 // Shows "TO SHED IS TO ?" and displays 2 random items, then transitions to page
 
 (function() {
+  // Check if we should redirect to archive (root page)
+  const isRoot = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromArchive = urlParams.get('from') === 'archive';
+  
+  // If on root and not coming from archive, hide main content and show transition
+  if (isRoot && !fromArchive) {
+    const scroller = document.getElementById('scroller');
+    if (scroller) {
+      scroller.style.display = 'none';
+    }
+    window.shouldRedirectToArchive = true;
+  }
+  
   // Only run on initial page load (not on navigation)
   if (sessionStorage.getItem('transitionShown')) {
     // Hide overlay immediately if transition was already shown in this session
@@ -10,6 +24,11 @@
       overlay.classList.add('hidden');
     }
     document.body.classList.remove('transitioning');
+    
+    // If we should redirect, do it now
+    if (window.shouldRedirectToArchive) {
+      window.location.replace('archive.html');
+    }
     return;
   }
 
@@ -53,6 +72,11 @@
       setTimeout(() => {
         overlay.classList.add('hidden');
         document.body.classList.remove('transitioning');
+        
+        // Redirect to archive.html if we're on the root page
+        if (window.shouldRedirectToArchive) {
+          window.location.replace('archive.html');
+        }
       }, fadeDuration);
       return;
     }
@@ -80,6 +104,11 @@
           setTimeout(() => {
             overlay.classList.add('hidden');
             document.body.classList.remove('transitioning');
+            
+            // Redirect to archive.html if we're on the root page
+            if (window.shouldRedirectToArchive) {
+              window.location.replace('archive.html');
+            }
           }, fadeDuration);
         }, wordDisplayDuration);
       }

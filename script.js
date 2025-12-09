@@ -1,10 +1,23 @@
 // Hide sections before "00 Set the Scene" when coming from JOIN button
 document.addEventListener('DOMContentLoaded', () => {
-  // Check if we're coming from the archive page (JOIN button)
+  // Check if we're on root page and should redirect (hide main content)
+  const isRoot = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
   const urlParams = new URLSearchParams(window.location.search);
-  const fromArchive = urlParams.get('from') === 'archive' || sessionStorage.getItem('fromArchive');
+  const fromArchive = urlParams.get('from') === 'archive';
   
-  if (fromArchive) {
+  // If on root and not coming from archive, hide main content (transition will handle redirect)
+  if (isRoot && !fromArchive) {
+    const scroller = document.getElementById('scroller');
+    if (scroller) {
+      scroller.style.display = 'none';
+    }
+    return; // Don't proceed with other initialization
+  }
+  
+  // Check if we're coming from the archive page (JOIN button)
+  const fromArchiveSession = urlParams.get('from') === 'archive' || sessionStorage.getItem('fromArchive');
+  
+  if (fromArchiveSession) {
     // Add class to body for CSS targeting
     document.body.classList.add('from-archive');
     
