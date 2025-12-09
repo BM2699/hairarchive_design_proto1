@@ -8,24 +8,52 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Shadows+Into+Light&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- Transition Overlay -->
+  <div id="transitionOverlay" class="transition-overlay">
+    <div class="transition-content">
+      <h1 class="transition-text">TO SHED IS TO <span id="transitionWord">?</span></h1>
+    </div>
+  </div>
+
   <header id="mainHeader" class="main-header">
-    <a href="#" class="header-link header-link-left" id="infoLink">info</a>
+    <a href="#" class="header-link header-link-left" id="infoLink">about</a>
     <div class="header-logo-container">
       <img src="images/pdev_logo.png" alt="Logo" class="header-logo">
     </div>
-    <a href="#" class="header-link header-link-right" id="joinLink">join</a>
+    <a href="index.html?from=archive" class="header-link header-link-right" id="joinLink">join</a>
   </header>
   <main id="archiveMain">
     <!-- About Section -->
     <section id="about" class="section scroll-snap-section">
+      <div id="aboutBackground" class="about-background"></div>
+      <div id="aboutOverlay" class="about-overlay"></div>
       <div class="about-content">
-        <h1>About the Archive</h1>
+        <h1>ABOUT</h1>
         <div class="about-text">
-          <p>Shed Hair Archive is a collective experiment investigating shed hair as an extension of identity through the lens of auto-ethnography and epigenetics.</p>
-          <p>Each submission represents a personal narrative, exploring the connections between our physical traces and our inherited traits, memories, and sense of self.</p>
-          <p>Through this archive, we examine how something as seemingly mundane as a fallen strand can carry profound meaning—connecting us to our ancestors, our environments, and our evolving identities.</p>
+          <p>Matrilineal Hair Archive is a collective experiment investigating shed hair as an extension of identity through the lens of auto-ethnography and epigenetic.</p>
+          <p>The following archive is the result of a <a href="#" id="installationLink" class="installation-link">2-day crowd-sourced installation</a> that took place in Brooklyn, N.Y., Spring 2025.</p>
+          <p>Participants were asked to:</p>
+          <ol>
+            <li>contribute a sample of their hair</li>
+            <li>write down a physical, spiritual, emotional, or habitual trait they believe inherited from their maternal side</li>
+          </ol>
+          <p>Each submission represents a personal narrative, exploring the connections between our physical traces and our maternal inheritance, memories, and sense of self.</p>
+          <p>This archive is curious about:</p>
+          <ol>
+            <li>What is shed hair beyond waste, resource, and evidence?</li>
+            <li>Who decides what is worthy for preservation?</li>
+            <li>How do we, and can we, negotiate the terms for our data usage?</li>
+          </ol>
         </div>
-        <a href="index.html" class="btn primary" style="margin-top: 2em;">Join the Archive</a>
+      </div>
+      
+      <!-- Image Gallery (hidden by default) -->
+      <div id="installationGallery" class="installation-gallery">
+        <div class="gallery-image-container">
+          <img id="galleryImage" src="" alt="Installation image">
+          <button class="gallery-arrow gallery-arrow-left" id="galleryPrev" aria-label="Previous image">‹</button>
+          <button class="gallery-arrow gallery-arrow-right" id="galleryNext" aria-label="Next image">›</button>
+        </div>
       </div>
       
       <!-- Fixed Header at bottom when About section is in view -->
@@ -61,7 +89,6 @@
   <!-- Image Modal (shows original on click) -->
   <div id="imageModal" class="modal">
     <div class="modal-content">
-      <span class="modal-close">&times;</span>
       <img id="modalImage" src="" alt="">
       <div id="modalInfo" class="modal-info"></div>
     </div>
@@ -74,6 +101,7 @@
     window.SUPABASE_URL = 'https://cphqjbvwmrzbrvjkyned.supabase.co';
     window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwaHFqYnZ3bXJ6YnJ2amt5bmVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNjg3MTMsImV4cCI6MjA3Nzg0NDcxM30.C6bthui6fjKoDgQ9ZKaBLBLo0rDxgcffI7b4j40xVCU';
   </script>
+  <script src="transition.js"></script>
   <script src="archive-script.js"></script>
 </body>
 </html>

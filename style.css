@@ -33,6 +33,12 @@ body {
   font-family: 'ABCMonumentGrotesk', sans-serif;
   background: var(--paper);
   color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* Hide body content during transition */
+body.transitioning {
+  overflow: hidden;
 }
 
 h1, h2, .eyebrow, .hint, .btn {
@@ -48,9 +54,9 @@ h1, h2, .eyebrow, .hint, .btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem 2rem;
+  padding: 0.25rem 2rem 0.25rem 2rem;
   background: transparent;
-  z-index: 1000;
+  z-index: 10001;
   transition: background-color 0.3s ease;
   gap: 1.5rem;
 }
@@ -59,7 +65,7 @@ h1, h2, .eyebrow, .hint, .btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1001;
+  z-index: 10002;
 }
 
 .header-logo {
@@ -70,27 +76,18 @@ h1, h2, .eyebrow, .hint, .btn {
 }
 
 .header-link {
-  font-family: 'ABCMonumentGrotesk', sans-serif;
-  font-size: 0.875rem;
+  font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
   color: var(--ink);
-  text-decoration: none;
-  text-transform: lowercase;
+  text-decoration: underline;
+  text-transform: uppercase;
   opacity: 0;
   transition: opacity 0.3s ease, filter 0.3s ease;
-  z-index: 1002;
+  z-index: 10003;
   padding: 0.5rem 1rem;
-  border-radius: 20px;
   position: relative;
-  border: none;
-  overflow: hidden;
-  /* Clump of hair background - dense overlapping strands */
-  background-image: 
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg stroke='%23111' stroke-width='0.4' fill='none' opacity='0.5'%3E%3Cpath d='M5,10 L18,15 M8,20 L22,12 M12,30 L26,22 M15,40 L29,32 M18,50 L32,42'/%3E%3Cpath d='M10,8 L25,13 M13,18 L28,10 M16,28 L31,20 M19,38 L34,30 M22,48 L37,40'/%3E%3Cpath d='M15,6 L30,11 M18,16 L33,8 M21,26 L36,18 M24,36 L39,28 M27,46 L42,38'/%3E%3Cpath d='M20,4 L35,9 M23,14 L38,6 M26,24 L41,16 M29,34 L44,26 M32,44 L47,36'/%3E%3Cpath d='M25,2 L40,7 M28,12 L43,4 M31,22 L46,14 M34,32 L49,24 M37,42 L52,34'/%3E%3Cpath d='M8,15 L12,28 M11,25 L15,38 M14,35 L18,48 M17,45 L21,58'/%3E%3Cpath d='M18,13 L22,26 M21,23 L25,36 M24,33 L28,46 M27,43 L31,56'/%3E%3Cpath d='M28,11 L32,24 M31,21 L35,34 M34,31 L38,44 M37,41 L41,54'/%3E%3Cpath d='M38,9 L42,22 M41,19 L45,32 M44,29 L48,42 M47,39 L51,52'/%3E%3Cpath d='M6,12 L14,25 M9,22 L17,35 M12,32 L20,45 M15,42 L23,55'/%3E%3Cpath d='M16,10 L24,23 M19,20 L27,33 M22,30 L30,43 M25,40 L33,53'/%3E%3Cpath d='M26,8 L34,21 M29,18 L37,31 M32,28 L40,41 M35,38 L43,51'/%3E%3Cpath d='M36,6 L44,19 M39,16 L47,29 M42,26 L50,39 M45,36 L53,49'/%3E%3Cpath d='M10,5 L20,18 M13,15 L23,28 M16,25 L26,38 M19,35 L29,48 M22,45 L32,58'/%3E%3Cpath d='M20,3 L30,16 M23,13 L33,26 M26,23 L36,36 M29,33 L39,46 M32,43 L42,56'/%3E%3Cpath d='M30,1 L40,14 M33,11 L43,24 M36,21 L46,34 M39,31 L49,44 M42,41 L52,54'/%3E%3Cpath d='M40,-1 L50,12 M43,9 L53,22 M46,19 L56,32 M49,29 L59,42 M52,39 L62,52'/%3E%3C/g%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Cg stroke='%23111' stroke-width='0.3' fill='none' opacity='0.4'%3E%3Cpath d='M3,8 L15,12 M6,18 L19,10 M10,28 L23,20 M13,38 L26,30 M16,48 L29,40'/%3E%3Cpath d='M8,6 L21,10 M11,16 L24,8 M14,26 L27,18 M17,36 L30,28 M20,46 L33,38'/%3E%3Cpath d='M13,4 L26,8 M16,14 L29,6 M19,24 L32,16 M22,34 L35,26 M25,44 L38,36'/%3E%3Cpath d='M18,2 L31,6 M21,12 L34,4 M24,22 L37,14 M27,32 L40,24 M30,42 L43,34'/%3E%3Cpath d='M5,10 L10,22 M8,20 L13,32 M11,30 L16,42 M14,40 L19,52'/%3E%3Cpath d='M15,8 L20,20 M18,18 L23,30 M21,28 L26,40 M24,38 L29,50'/%3E%3Cpath d='M25,6 L30,18 M28,16 L33,28 M31,26 L36,38 M34,36 L39,48'/%3E%3Cpath d='M35,4 L40,16 M38,14 L43,26 M41,24 L46,36 M44,34 L49,46'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 60px 60px, 50px 50px;
-  background-repeat: repeat;
-  background-position: 0 0, 10px 10px;
-  background-color: rgba(247, 247, 247, 0.4);
+  background: transparent;
 }
 
 .main-header:hover .header-link {
@@ -99,7 +96,7 @@ h1, h2, .eyebrow, .hint, .btn {
 
 .header-link:hover {
   filter: blur(3px);
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 /* ----- Scroll snap container ----- */
@@ -190,32 +187,57 @@ p { font-size: 1.1rem; line-height: 1.6; text-align: center; }
 /* ----- Unified Buttons ----- */
 .btn{
   font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
-  font-size: 1rem;
+  font-size: 0.8125rem;
+  font-weight: 400;
   line-height: 1.2;
-  padding: 10px 20px;
-  border-radius: 4px;
-  border: 1px solid var(--ink);
-  background: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: var(--ink);
+  text-decoration: underline;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.25s ease, color 0.25s ease, opacity 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  transition: filter 0.3s ease;
 }
-.btn:hover{ background: #f0f0f0; }
+.btn:hover{ 
+  filter: blur(3px);
+  background: transparent;
+}
 .btn:focus-visible{ outline: 2px solid var(--ink); outline-offset: 2px; }
 
-.secondary{ background: transparent; border-color: var(--ink); }
-.secondary:hover{ background: #f5f5f5; }
+/* Hide sections before "00 Set the Scene" when coming from JOIN button */
+body.from-archive #landing,
+body.from-archive #background,
+body.from-archive #introCallout {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.secondary{ 
+  background: transparent; 
+  border: none;
+  text-decoration: underline;
+}
+.secondary:hover{ 
+  background: transparent;
+  filter: blur(3px);
+}
 
 .primary{
   border: none;
-  background: var(--accent);
+  text-decoration: underline;
+  background: transparent;
   color: var(--ink);
-  padding: 10px 20px;
+  padding: 0.5rem 1rem;
   margin-top: 2em;
   cursor: pointer;
-  transition: 0.3s ease;
+  transition: filter 0.3s ease;
 }
-.primary:hover{ opacity: 0.85; }
+.primary:hover{ 
+  filter: blur(3px);
+  background: transparent;
+}
 
 /* Landing specifics */
 #landing h1 span{
@@ -690,9 +712,9 @@ html {
 #about.section {
   min-height: 100vh;
   display: flex !important;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 8vh 10vw 120px 10vw; /* Extra padding at bottom for header */
   position: relative;
   z-index: 1;
@@ -701,34 +723,222 @@ html {
   transform: none !important;
   background: var(--paper);
   cursor: pointer;
+  gap: 4rem;
+  overflow: hidden;
+}
+
+.about-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('images/background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+
+.about-overlay {
+  position: absolute;
+  z-index: 1;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 100vw var(--paper);
+  background: var(--paper);
+  pointer-events: none;
+  transition: background 0.2s ease;
+  transform: translate(-50%, -50%);
+}
+
+#about.section:hover .about-overlay {
+  background: transparent;
 }
 
 .about-content {
-  max-width: min(800px, 90%);
-  text-align: center;
+  width: 50%;
+  max-width: 50%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
   position: relative;
-  z-index: 2;
+  z-index: 3;
   color: var(--ink);
+}
+
+/* Match About section width to archive items width - same as archive list container */
+@media (min-width: 1201px) {
+  .about-content {
+    width: 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .about-content {
+    width: 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 600px) {
+  .about-content {
+    width: 90%;
+    max-width: 90%;
+    padding: 0 16px;
+  }
 }
 
 .about-content h1 {
   font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
   font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 400;
   margin-bottom: 2rem;
+  text-align: left;
   color: var(--ink) !important;
 }
 
 .about-text {
-  font-size: clamp(1rem, 2vw, 1.2rem);
-  line-height: 1.8;
+  font-size: 1.40625rem; /* Same as archive-cell font size */
+  line-height: 0.9;
   margin-bottom: 2rem;
   color: var(--ink) !important;
 }
 
 .about-text p {
+  font-size: 1.40625rem; /* Same as archive-cell font size */
+  line-height: 0.9;
   margin-bottom: 1.5rem;
   text-align: left;
   color: var(--ink) !important;
+}
+
+.about-text p:has(+ ol) {
+  margin-bottom: 0.25rem;
+}
+
+.about-text ol {
+  font-size: 1.40625rem; /* Same as archive-cell font size */
+  margin-left: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  color: var(--ink) !important;
+}
+
+.about-text ol li {
+  font-size: 1.40625rem; /* Same as archive-cell font size */
+  margin-bottom: 0.5rem;
+  line-height: 0.9;
+}
+
+/* Join the Archive button - match header link style */
+.about-join-link {
+  font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--ink);
+  text-decoration: underline;
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  position: relative;
+  background: transparent;
+  transition: filter 0.3s ease;
+}
+
+.about-join-link:hover {
+  filter: blur(3px);
+}
+
+/* Installation Link */
+.installation-link {
+  text-decoration: underline;
+  color: var(--ink);
+  cursor: pointer;
+  transition: filter 0.3s ease;
+}
+
+.installation-link:hover {
+  filter: blur(3px);
+}
+
+/* Installation Gallery */
+.installation-gallery {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50%;
+  max-width: 800px;
+  height: auto;
+  display: none;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  z-index: 3;
+  padding: 0;
+}
+
+.installation-gallery.visible {
+  display: flex;
+}
+
+.gallery-image-container {
+  flex: 1;
+  position: relative;
+  max-width: 100%;
+  max-height: calc(100vh - 160px); /* Account for header and centering */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 0;
+}
+
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  font-weight: 300;
+  cursor: pointer;
+  padding: 0.3rem 0.8rem;
+  line-height: 1;
+  transition: opacity 0.3s ease;
+  z-index: 11;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.gallery-arrow-left {
+  left: 0.5rem;
+}
+
+.gallery-arrow-right {
+  right: 0.5rem;
+}
+
+.gallery-image-container img {
+  max-width: 100%;
+  max-height: calc(100vh - 160px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.gallery-arrow:hover {
+  opacity: 0.7;
+}
+
+.gallery-arrow:active {
+  opacity: 0.5;
 }
 
 /* Archive Grid Section */
@@ -825,7 +1035,7 @@ html {
 /* Default archive cell styling */
 .archive-cell {
   font-size: 1.40625rem; /* 22.5px - matches reference */
-  line-height: 1.5;
+  line-height: 1.2;
   color: var(--ink); /* No !important - allows state styles to override */
   word-break: break-word;
   font-weight: 400;
@@ -858,7 +1068,7 @@ html {
   font-family: 'ABCMonumentGrotesk', sans-serif;
   font-weight: 400;
   font-size: 1.40625rem; /* 22.5px - matches reference */
-  line-height: 1.5;
+  line-height: 1.2;
   /* Color is inherited from parent state classes */
 }
 
@@ -955,7 +1165,7 @@ html {
   
   .archive-cell {
     font-size: 0.8125rem;
-    line-height: 1.5;
+    line-height: 1.2;
   }
   
   .archive-cell:first-of-type {
@@ -1165,4 +1375,58 @@ html {
 #introCallout .intro-callout p{
   font-size: clamp(1.1rem, 2.5vw, 1.35rem);
   line-height: 1.7;
+}
+
+/* Transition Overlay */
+.transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--paper);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.8s ease, visibility 0.8s ease, filter 0.8s ease;
+}
+
+.transition-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  filter: blur(8px);
+}
+
+.transition-content {
+  text-align: center;
+}
+
+.transition-text {
+  font-family: 'PPEditorialNew', 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 400;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.transition-text #transitionWord {
+  display: inline-block;
+  min-width: 200px;
+  text-align: left;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+.transition-text #transitionWord.fade-out {
+  opacity: 0;
+  filter: blur(8px);
+}
+
+.transition-text #transitionWord.fade-in {
+  opacity: 1;
+  filter: blur(0px);
 }

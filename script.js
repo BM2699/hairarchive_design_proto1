@@ -1,3 +1,45 @@
+// Hide sections before "00 Set the Scene" when coming from JOIN button
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if we're coming from the archive page (JOIN button)
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromArchive = urlParams.get('from') === 'archive' || sessionStorage.getItem('fromArchive');
+  
+  if (fromArchive) {
+    // Add class to body for CSS targeting
+    document.body.classList.add('from-archive');
+    
+    // Hide landing, background, and introCallout sections
+    const landing = document.getElementById('landing');
+    const background = document.getElementById('background');
+    const introCallout = document.getElementById('introCallout');
+    
+    if (landing) {
+      landing.style.display = 'none';
+      landing.style.visibility = 'hidden';
+    }
+    if (background) {
+      background.style.display = 'none';
+      background.style.visibility = 'hidden';
+    }
+    if (introCallout) {
+      introCallout.style.display = 'none';
+      introCallout.style.visibility = 'hidden';
+    }
+    
+    // Scroll to "Set the Scene" section after transition
+    const sceneSection = document.getElementById('scene');
+    if (sceneSection) {
+      // Wait for transition to complete
+      setTimeout(() => {
+        sceneSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 2000); // Wait for transition animation
+    }
+    
+    // Clear the flag
+    sessionStorage.removeItem('fromArchive');
+  }
+});
+
 /* ===== Fade sections in when in view ===== */
 const sections = document.querySelectorAll('.section');
 const sectionObserver = new IntersectionObserver(entries => {
@@ -12,24 +54,30 @@ const landing = document.getElementById('landing');
 const altWords = ["forget", "savor", "remember", "let go"];
 let wordIndex = 0, interval, revealTimeout;
 
-question.addEventListener('mouseenter', () => {
-  interval = setInterval(() => {
-    question.textContent = altWords[wordIndex++ % altWords.length];
-  }, 800);
-  // Reveal the investigate button after 1s of hover
-  revealTimeout = setTimeout(() => {
-    landing.classList.add('active');
-  }, 1000);
-});
-question.addEventListener('mouseleave', () => {
-  clearInterval(interval);
-  clearTimeout(revealTimeout);
-  question.textContent = "?";
-});
+// Only set up landing hover if question element exists
+if (question) {
+  question.addEventListener('mouseenter', () => {
+    interval = setInterval(() => {
+      question.textContent = altWords[wordIndex++ % altWords.length];
+    }, 800);
+    // Reveal the investigate button after 1s of hover
+    revealTimeout = setTimeout(() => {
+      if (landing) landing.classList.add('active');
+    }, 1000);
+  });
+  question.addEventListener('mouseleave', () => {
+    clearInterval(interval);
+    clearTimeout(revealTimeout);
+    question.textContent = "?";
+  });
+}
 
-investigateBtn.addEventListener('click', () => {
-  document.querySelector('#background').scrollIntoView({ behavior: 'smooth' });
-});
+// Only set up investigate button if it exists
+if (investigateBtn) {
+  investigateBtn.addEventListener('click', () => {
+    document.querySelector('#background')?.scrollIntoView({ behavior: 'smooth' });
+  });
+}
 
 // Join button - scroll to intro callout section
 document.getElementById('joinArchive')?.addEventListener('click', () => {
@@ -720,12 +768,89 @@ promptElements.forEach(p => {
 });
 
 /* ===== Next buttons (in-section) ===== */
-document.querySelectorAll('.next').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const nextSection = btn.closest('.section')?.nextElementSibling;
-    nextSection?.scrollIntoView({ behavior: 'smooth' });
+// Handle next/confirm button clicks to move to next section
+function initNextButtons() {
+  const nextButtons = document.querySelectorAll('.next');
+  
+  if (nextButtons.length === 0) {
+    console.warn('No .next buttons found');
+    return;
+  }
+  
+  nextButtons.forEach((btn) => {
+    // Remove any existing onclick to avoid duplicates
+    btn.onclick = null;
+    
+    // Use onclick for direct event handling
+    btn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const currentSection = this.closest('.section');
+      if (!currentSection) {
+        return false;
+      }
+      
+      // Find next visible section (skip hidden ones)
+      let nextSection = currentSection.nextElementSibling;
+      while (nextSection) {
+        const isHidden = nextSection.style.display === 'none' || 
+                         nextSection.style.visibility === 'hidden' ||
+                         nextSection.classList.contains('hidden');
+        if (!isHidden && nextSection.classList.contains('section')) {
+          break;
+        }
+        nextSection = nextSection.nextElementSibling;
+      }
+      
+      if (nextSection) {
+        // Scroll within the scroller container
+        const scroller = document.getElementById('scroller');
+        if (scroller) {
+          // Temporarily disable scroll-snap for smooth scrolling
+          const originalSnapType = scroller.style.scrollSnapType;
+          scroller.style.scrollSnapType = 'none';
+          
+          // Get the offsetTop of the section relative to scroller
+          const scrollPosition = nextSection.offsetTop;
+          
+          scroller.scrollTo({ 
+            top: scrollPosition, 
+            behavior: 'smooth' 
+          });
+          
+          // Re-enable scroll-snap after a delay
+          setTimeout(() => {
+            scroller.style.scrollSnapType = originalSnapType || '';
+          }, 1000);
+        } else {
+          // Fallback to scrollIntoView
+          nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+      
+      return false;
+    };
   });
-});
+}
+
+// Initialize next buttons when DOM is ready
+function setupNextButtons() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait a bit for transition to complete
+      setTimeout(initNextButtons, 100);
+    });
+  } else {
+    // DOM already loaded, initialize after transition
+    setTimeout(initNextButtons, 100);
+  }
+  
+  // Also try again after transition completes (usually ~3-4 seconds)
+  setTimeout(initNextButtons, 3500);
+}
+
+setupNextButtons();
 
 /* ===== Review population on entry ===== */
 const reviewContainer = document.getElementById('reviewContainer');

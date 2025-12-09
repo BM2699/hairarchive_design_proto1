@@ -6,12 +6,30 @@
   <title>Hair Archive</title>
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+  <script>
+    // Redirect root URL to archive.html (only if not coming from archive)
+    // Check if we're at root path
+    const isRoot = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromArchive = urlParams.get('from') === 'archive';
+    
+    // Only redirect if we're at root and not coming from archive page
+    if (isRoot && !fromArchive) {
+      window.location.replace('archive.html');
+    }
+  </script>
 </head>
 <body>
+  <!-- Transition Overlay -->
+  <div id="transitionOverlay" class="transition-overlay">
+    <div class="transition-content">
+      <h1 class="transition-text">TO SHED IS TO <span id="transitionWord">?</span></h1>
+    </div>
+  </div>
+
   <main id="scroller">
-    <!-- SECTION 1: Landing -->
-    <section id="landing" class="section">
-      <h1>to shed is to <span id="question">?</span></h1>
+    <!-- SECTION 1: Landing (hidden) -->
+    <section id="landing" class="section" style="display: none !important;">
       <div class="landing-actions">
         <a href="archive.html" class="btn primary" style="margin: 1rem;">View Archive</a>
         <button id="joinArchive" class="btn primary" style="margin: 1rem;">Join</button>
@@ -20,8 +38,8 @@
       
     </section>
 
-    <!-- SECTION 2: Background (cinematic scroll with fixed text + scrolling visuals) -->
-    <section id="background" class="section long">
+    <!-- SECTION 2: Background (hidden) -->
+    <section id="background" class="section long" style="display: none !important;">
       <div class="bg-inner">
         <div class="bg-text">
           <div class="bg-copy" id="bgCopy">
@@ -43,7 +61,8 @@
       
     </section>
 
-    <section id="introCallout" class="section">
+    <!-- SECTION: Intro Callout (hidden) -->
+    <section id="introCallout" class="section" style="display: none !important;">
       <div class="intro-callout">
         <p>Shed Hair Archive is a collective experiment investigating shed hair as an extension of identity through the lens of auto-ethnography and epigenetics.</p>
         <button id="beginFromBg" class="btn primary" style="margin-top:1.4em;">Begin Your Investigation</button>
@@ -57,7 +76,7 @@
         <h2 class="eyebrow fixed-heading scene-heading">Set the Scene</h2>
       </div>
       <div class="scene-body">
-        <p>For the optimal experience, it’s best to begin the investigation in your living space.</p><p>If you’re elsewhere, start from the space that holds you now.</p>
+        <p>For the optimal experience, it's best to begin the investigation in your living space.</p><p>If you're elsewhere, start from the space that holds you now.</p>
       </div>
       <div class="scene-footer">
         <button class="btn primary next">Confirm</button>
@@ -113,7 +132,7 @@
   <div class="prompt" data-prompt="emotion" tabindex="0" role="button" aria-expanded="false">What emotion does this strand carry?</div>
         <textarea id="emotionText" class="response hidden" placeholder="Type your response..."></textarea>
 
-  <div class="prompt" data-prompt="connection" tabindex="0" role="button" aria-expanded="false">Who or what might share this strand’s lineage?</div>
+  <div class="prompt" data-prompt="connection" tabindex="0" role="button" aria-expanded="false">Who or what might share this strand's lineage?</div>
         <textarea id="connectionText" class="response hidden" placeholder="Type your response..."></textarea>
 
   <div class="prompt" data-prompt="connection-1" tabindex="0" role="button" aria-expanded="false">If this strand encapsulates a trait passed down to me, what would it be?<br>(could be spiritual, personality, physical)</div>
@@ -166,6 +185,7 @@
     window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwaHFqYnZ3bXJ6YnJ2amt5bmVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNjg3MTMsImV4cCI6MjA3Nzg0NDcxM30.C6bthui6fjKoDgQ9ZKaBLBLo0rDxgcffI7b4j40xVCU';
   </script>
   <script src="supabase-client.js"></script>
+  <script src="transition.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

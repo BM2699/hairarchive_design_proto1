@@ -266,14 +266,7 @@ function closeImageModal() {
 
 // Initialize modal close handlers
 function initModalHandlers() {
-  const closeButton = document.querySelector('.modal-close');
   const modal = document.getElementById('imageModal');
-  
-  if (closeButton) {
-    closeButton.addEventListener('click', () => {
-      closeImageModal();
-    });
-  }
   
   if (modal) {
     modal.addEventListener('click', (e) => {
@@ -441,11 +434,13 @@ function initScrollSnap() {
     aboutSection.addEventListener('click', (e) => {
       const clickedElement = e.target;
       
-      // Don't trigger if clicking on links or buttons
+      // Don't trigger if clicking on links, buttons, or gallery
       const isInteractiveElement = clickedElement.tagName === 'A' ||
                                    clickedElement.tagName === 'BUTTON' ||
+                                   clickedElement.id === 'installationGallery' ||
                                    clickedElement.closest('a') ||
-                                   clickedElement.closest('button');
+                                   clickedElement.closest('button') ||
+                                   clickedElement.closest('#installationGallery');
       
       // Allow clicking anywhere else in the section to scroll
       if (!isInteractiveElement && archiveSection) {
@@ -474,6 +469,81 @@ function initScrollSnap() {
   }
 }
 
+// Installation Gallery functionality
+function initInstallationGallery() {
+  const installationLink = document.getElementById('installationLink');
+  const gallery = document.getElementById('installationGallery');
+  const galleryImage = document.getElementById('galleryImage');
+  const prevButton = document.getElementById('galleryPrev');
+  const nextButton = document.getElementById('galleryNext');
+  
+  if (!installationLink || !gallery || !galleryImage) return;
+  
+  const images = [
+    'images/DSC01114.jpg',
+    'images/DSC01111.jpg',
+    'images/DSC01100.jpg'
+  ];
+  
+  let currentImageIndex = 0;
+  
+  // Show first image
+  galleryImage.src = images[currentImageIndex];
+  
+  // Toggle gallery on link click
+  installationLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent section scroll
+    
+    if (gallery.classList.contains('visible')) {
+      gallery.classList.remove('visible');
+    } else {
+      gallery.classList.add('visible');
+      currentImageIndex = 0;
+      galleryImage.src = images[currentImageIndex];
+    }
+  });
+  
+  // Navigate to previous image
+  if (prevButton) {
+    prevButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+      galleryImage.src = images[currentImageIndex];
+    });
+  }
+  
+  // Navigate to next image
+  if (nextButton) {
+    nextButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      currentImageIndex = (currentImageIndex + 1) % images.length;
+      galleryImage.src = images[currentImageIndex];
+    });
+  }
+}
+
+// About section background reveal effect
+function initAboutBackgroundReveal() {
+  const aboutSection = document.getElementById('about');
+  const aboutOverlay = document.getElementById('aboutOverlay');
+  
+  if (!aboutSection || !aboutOverlay) return;
+  
+  const overlayHalfWidth = aboutOverlay.clientWidth / 2;
+  
+  aboutSection.addEventListener('mousemove', (e) => {
+    const rect = aboutSection.getBoundingClientRect();
+    const leftPosition = e.clientX - rect.left;
+    const topPosition = e.clientY - rect.top;
+    
+    aboutOverlay.style.left = (leftPosition - overlayHalfWidth) + 'px';
+    aboutOverlay.style.top = (topPosition - overlayHalfWidth) + 'px';
+  });
+}
+
 // Load archive on page load
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM loaded');
@@ -482,6 +552,8 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('Archive container:', document.getElementById('archiveContainer'));
   initModalHandlers();
   initScrollSnap();
+  initInstallationGallery();
+  initAboutBackgroundReveal();
   loadArchiveItems();
 });
 
