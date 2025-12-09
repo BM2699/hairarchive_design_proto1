@@ -25,9 +25,18 @@
   if (fromArchive) {
     const overlay = document.getElementById('transitionOverlay');
     if (overlay) {
+      overlay.style.display = 'none';
       overlay.classList.add('hidden');
     }
     document.body.classList.remove('transitioning');
+    
+    // Make sure main content is visible
+    const scroller = document.getElementById('scroller');
+    if (scroller) {
+      scroller.style.display = 'block';
+      scroller.style.visibility = 'visible';
+    }
+    
     return; // Don't show transition when coming from archive
   }
   

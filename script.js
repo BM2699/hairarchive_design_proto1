@@ -1,27 +1,16 @@
 // Hide sections before "00 Set the Scene" when coming from JOIN button
 document.addEventListener('DOMContentLoaded', () => {
-  // Check if we're on root page and should redirect (hide main content)
-  const isRoot = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
   const urlParams = new URLSearchParams(window.location.search);
   const fromArchive = urlParams.get('from') === 'archive';
+  const isRoot = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
   
-  // If on root and not coming from archive, hide main content (transition will handle redirect)
-  if (isRoot && !fromArchive) {
-    const scroller = document.getElementById('scroller');
-    if (scroller) {
-      scroller.style.display = 'none';
-    }
-    return; // Don't proceed with other initialization
-  }
-  
-  // Check if we're coming from the archive page (JOIN button)
-  const fromArchiveSession = urlParams.get('from') === 'archive' || sessionStorage.getItem('fromArchive');
-  
-  if (fromArchiveSession) {
+  // Check if we're coming from the archive page (JOIN button) FIRST
+  if (fromArchive) {
     // Make sure main content is visible
     const scroller = document.getElementById('scroller');
     if (scroller) {
       scroller.style.display = 'block';
+      scroller.style.visibility = 'visible';
     }
     
     // Add class to body for CSS targeting
@@ -51,11 +40,19 @@ document.addEventListener('DOMContentLoaded', () => {
       // Wait a bit for page to render
       setTimeout(() => {
         sceneSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 500); // Reduced delay since no transition
+      }, 300);
     }
     
-    // Clear the flag
-    sessionStorage.removeItem('fromArchive');
+    return; // Don't proceed with other initialization
+  }
+  
+  // If on root and not coming from archive, hide main content (transition will handle redirect)
+  if (isRoot && !fromArchive) {
+    const scroller = document.getElementById('scroller');
+    if (scroller) {
+      scroller.style.display = 'none';
+    }
+    return; // Don't proceed with other initialization
   }
 });
 
